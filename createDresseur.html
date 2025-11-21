@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Créer un dresseur</title>
+        <!-- Charger la bibliothèque d’icônes Font Awesome depuis un CDN (Cloudflare), 
+             Avec vérification de sécurité (SRI) (integrity)
+             Sans fuite de données (referrer + crossorigin)  -->
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="   
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <h2>Créer un nouveau dresseur</h2>
+
+    <form id="dresseurForm">                                        
+        <label>Nom :</label><br>                                    <!-- Identifiant pour récupérer le formulaire dans le JavaScript. -->
+        <input type="text" id="nom" required><br><br>               <!-- Champ où l’utilisateur saisit le nom. -->
+
+        <!-- Liste des pokemons. -->
+        <fieldset>
+            <legend>Sélectionner zéro, un ou plusieurs Pokemons capturés :</legend>
+            <div id="pokemonList"></div>                            <!-- Zone où on affichera dynamiquement des cases à cocher. -->
+        </fieldset><br>
+
+        <!-- Liste des pbjets. -->
+        <fieldset>
+            <legend>Sélectionner zéro, un ou plusieurs objets :</legend>
+            <div id="objetList"></div>
+        </fieldset><br>
+
+        <button type="submit">Créer le dresseur</button>
+    </form>
+
+    <div id="result"></div>         <!-- Zone où on affichera dynamiquement les données enregistrées. -->
+
+    <script>
+        // Récupération du formuaire.
+        const form = document.getElementById('dresseurForm');
+
+        // Fonction générique pour afficher une liste de cases à cocher.
+            // container : la <div> où on va mettre les cases à cocher
+            // items : tableau reçu de l’API
+            // nameAttr : le nom à attribuer à chaque checkbox (ex : "pokemons", "objets")
+            // labelField : nom du champ à afficher (ex : "nom")
+        function renderCheckboxList(container, items, nameAttr, labelField) {
+            container.innerHTML = '';                                               // Vide la div avant d'ajouter les nouvelles cases.
+            items.forEach(it => {
+                // Création d'une checkbox pour chaque élément.
+                const label = document.createElement('label');                      // Créer un élément HTML <label> qui permettent un affichage propre et un clic plus facile sur la checkbox.
+                
+                const cb = document.createElement('input');                         // Créer une checbox
+                cb.type = 'checkbox';                                               // Définit le type de l’input : une case à cocher.
+                cb.name = nameAttr;                                                 // Donne un nom commun à toutes les cases.
+                cb.value = it._id;                                                  // La valeur envoyée au serveur sera l’ID MongoDB de l’objet.
+
+                label.appendChild(cb);                                              // Mettre la checkbox à l’intérieur du <label>.
+                label.appendChild(document.createTextNode(" " + it[labelField]));   // Ajouter le texte à afficher à côté de la case.
+                                                       // " " + ... ajoute un espace avant.
+                                                       // it[labelField] récupère la valeur du champs donné (ici: "nom").
+                container.appendChild(label);                                       // Ajouter le <label> complet dans la div (container).
+                container.appendChild(document.createElement('br'));                // Ajouter un saut de ligne
+            });
+        }
+
+        // Fonction déclarée comme async : utilisation de await à l’intérieur pour gérer des opérations asynchrones (fetch HTTP).
+        // Charger les pokémons capturables
+        async function loadPokemons() {
+            const res = await fetch('http://localhost:3000/api/pokemon');           // Envoyer une requête HTTP GET à API Express
+                           // fetch(...) : demander au serveur la liste des Pokémon
+                     // await : attendre que la réponse arrive sans bloquer la page
+               // res : contient l’objet réponse (pas encore les données !)
+            const pokemons = await res.json();                                      // Transformer la réponse en JSON
+            renderCheckboxList(
+                document.getElementById('pokemonList'),     // La <div> où afficher les checkbox.
+                pokemons,                                   // Les données reçues depuis l’API.
+                'pokemon',                                  // Le nom donné à chaque champ checkbox.
+                'nom'                                       // Le champ affiché dans le label.
+            );
+        }
+
+        // Charger les objets 
+        async function loadObjets() {
+            const res = await fetch('http://localhost:3000/api/objets');
+            const objets = await res.json();
+            renderCheckboxList(
+                document.getElementById('objetList'), 
+                objets, 
+                'objet', 
+                'nom'
+            );
+        }
+
+        // Sélectionner toutes les cases cochées.
+            // querySelectorAll...) retourne une NodeList, pas un tableau.
+            // querySelectorAll(...) sélectionne tous les éléments HTML qui correspondent au sélecteur CSS.
+            // le sélecteur est :
+                // input[name="..."]:checked  :  tous les <input> ayant un attribut name et qui sont cochés (:checked)
+        function collectChecked(name) {
+            // Array.from() transforme une NodeList en vrai tableau JavaScript.
+            return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`))
+                .map(i => i.value);             // Pour chaque case cochée (i), on récupère sa valeur (value = _id).
+        }
+
+
+        // Charger les données au chargement de la page
+        loadPokemons();
+        loadObjets();
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault(); // On utilise preventDefault() pour empecher le rechargement de la page afin d'afficher les données intégrées
+
+            // Reconstruction d'un objet de type Dresseur avec les données du formulaire
+            const data = {
+                nom: document.getElementById('nom').value,
+                // Récupérer toutes les cases cochées portant le name="pokemon".
+                // .map(...) : transformer chaque ID en un objet complet [{ pokemon: "675ab12", team: false }, ...]
+                Pokemon_captures: collectChecked('pokemon').map(
+                    p => ({
+                        pokemon: p,
+                        team: false     // Aucun Pokémon n’est encore dans l’équipe.
+                    })
+                ),
+                // Récupérer toutes les cases cochées portant le name="objet".
+                objets: collectChecked('objet')            
+            };
+
+            // Ici on envoie la requête au serveur en utilisant fetch
+            // On utilise la methode POST car on veut créer un nouveau dresseur
+            try {
+                const response = await fetch('http://localhost:3000/api/dresseurs', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },        // Le header indique au serveur que ce qu'il envoie est du JSON.
+                    body: JSON.stringify(data)                              // JSON.stringify() convertit l’objet en texte JSON.
+                });
+
+                // response.json() lit le corps de la réponse et le convertit depuis du JSON vers un objet JavaScript.
+                // result devient un objet JS.
+                const result = await response.json();
+
+                // Mettre du texte dans la <div id="result"></div> de la page HTML.
+                document.getElementById('result').innerText =
+                    "Réponse serveur : " + JSON.stringify(result, null, 2);     
+                                                               // null : on n’utilise pas de fonction de transformation
+                                                                     // 2 : indentation pour rendre le JSON lisible
+            } catch (error) {
+                console.error("Erreur :", error);
+            }
+        });
+    </script>
+
+</body>
+</html>
