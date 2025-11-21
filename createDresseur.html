@@ -14,34 +14,101 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div id="toastContainer"></div>
 
-    <h2>Créer un nouveau dresseur</h2>
+    <div class="page-header">
+        <h2>Créer un dresseur</h2>
 
-    <form id="dresseurForm">                                        
-        <label>Nom :</label><br>                                    <!-- Identifiant pour récupérer le formulaire dans le JavaScript. -->
-        <input type="text" id="nom" required><br><br>               <!-- Champ où l’utilisateur saisit le nom. -->
+        <button class="back-btn" onclick="window.location.href='getDresseurs.html'">
+            <i class="fa-solid fa-arrow-left"></i>
+            Retour à la liste
+        </button>
+    </div>
 
-        <!-- Liste des pokemons. -->
-        <fieldset>
-            <legend>Sélectionner zéro, un ou plusieurs Pokemons capturés :</legend>
-            <div id="pokemonList"></div>                            <!-- Zone où on affichera dynamiquement des cases à cocher. -->
-        </fieldset><br>
+    <div class="card">
+        <form id="dresseurForm">
+            <div class="form-group">
+                <label for="name">Nom :</label>
+                <input type="text" id="nom" required>
+            </div>
 
-        <!-- Liste des pbjets. -->
-        <fieldset>
-            <legend>Sélectionner zéro, un ou plusieurs objets :</legend>
-            <div id="objetList"></div>
-        </fieldset><br>
+            <div class="form-group">
+                <label>Pokémons capturés :</label>
+                <div class="inline-group">
+                    <select id="pokemonSelect">
+                        <option value="">-- Choisir un pokémon --</option>
+                    </select>
+                    <button type="button" class="add-pokemon-btn" id="addPokemonBtn">
+                        <i class="fa-solid fa-plus"></i>
+                        Ajouter
+                    </button>
+                </div>
+                <small>Vous pouvez ajouter plusieurs fois le même pokémon.</small>
 
-        <button type="submit">Créer le dresseur</button>
-    </form>
+                <ul id="selectedPokemonList">
+                    <li>Aucun pokémon sélectionné pour l'instant.</li>
+                </ul>
+            </div>
 
-    <div id="result"></div>         <!-- Zone où on affichera dynamiquement les données enregistrées. -->
+            <div class="form-group">
+                <label>Objets :</label>
+                <div class="inline-group">
+                    <select id="objetSelect">
+                        <option value="">-- Choisir un objet --</option>
+                    </select>
+                    <button type="button" class="add-objet-btn" id="addObjetBtn">
+                        <i class="fa-solid fa-plus"></i>
+                        Ajouter
+                    </button>
+                </div>
+                <small>Vous pouvez ajouter plusieurs fois le même objet.</small>
+
+                <ul id="selectedObjetList">
+                    <li>Aucun objet sélectionné pour l'instant.</li>
+                </ul>
+            </div>
+
+            <button type="submit" class="submit-btn">
+                <i class="fa-solid fa-plus"></i>
+                Créer
+            </button>
+        </form>
+    </div>
 
     <script>
-        // Récupération du formuaire.
-        const form = document.getElementById('dresseurForm');
+        const API_DRESSEURS = 'http://localhost:3000/api/dresseurs';
+        const API_POKEMONS = 'http://localhost:3000/api/pokemons';
+        const API_OBJETS = 'http://localhost:3000/api/objets';
 
+        // Récupération du formulaire.
+        const form = document.getElementById('dresseurForm');
+        const pokemonSelect = document.getElementById('pokemonSelect');
+        const addPokemonBtn = document.getElementById('addPokemonBtn');
+        const selectedPokemonList = document.getElementById('selectedPokemonList');
+        const objetSelect = document.getElementById('objetSelect');
+        const addObjetBtn = document.getElementById('addObjetBtn');
+        const selectedObjetList = document.getElementById('selectedObjetList');
+
+        /**
+         * Affiche un message de type toast (succès ou erreur)
+         * @param {string} message - Le message à afficher
+         * @param {string} [type="success"] - Le type du message (succès ou erreur)
+         */
+        function showToast(message, type = "success") {
+            const container = document.getElementById("toastContainer");        // Indication de l'emplacement <div> qui servira de conteneur pour les notifications.
+            const toast = document.createElement("div");                        // Création dynamique d'un nouvel élément <div> qui représentera notre notification.
+
+            toast.className = "toast";                                          // On ajoute la classe "toast" à ce <div>.
+            if (type === "error") toast.classList.add("error");                 // Si le type de notification est "error", on ajoute une classe CSS "error" supplémentaire.
+
+            toast.textContent = message;                                        // On met le texte fourni (message) à l’intérieur du <div>.
+            container.appendChild(toast);                                       // On ajoute le toast dans le conteneur sur la page pour qu’il devienne visible.
+
+            setTimeout(() => {toast.remove();}, 5000);                          // Suppression automatique du toast après 5000 millisecondes (5 secondes).
+        }
+
+/** Première version avant correction par rapport aux fichier createBouquet.html
+ *  Dans cette version, on ne peut pas avoir des pokémons et des objets en double
         // Fonction générique pour afficher une liste de cases à cocher.
             // container : la <div> où on va mettre les cases à cocher
             // items : tableau reçu de l’API
@@ -66,6 +133,7 @@
                 container.appendChild(document.createElement('br'));                // Ajouter un saut de ligne
             });
         }
+
 
         // Fonction déclarée comme async : utilisation de await à l’intérieur pour gérer des opérations asynchrones (fetch HTTP).
         // Charger les pokémons capturables
@@ -94,6 +162,7 @@
                 'nom'
             );
         }
+*/
 
         // Sélectionner toutes les cases cochées.
             // querySelectorAll...) retourne une NodeList, pas un tableau.

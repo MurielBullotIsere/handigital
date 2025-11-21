@@ -42,37 +42,58 @@
     </div>
 
     <script>
+        const API_BASE_URL = 'http://localhost:3000/api/categories';     // Définition d'une variable constante qui contient l’adresse de base de l'API. Utilisation : ${API_BASE_URL}
         const form = document.getElementById('categorieForm');
 
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault(); // On utilise preventDefault() pour empecher le rechargement de la page afin d'afficher les données intégrées
+        /**
+         * Affiche un message de type toast (succès ou erreur)
+         * @param {string} message - Le message à afficher
+         * @param {string} [type="success"] - Le type du message (succès ou erreur)
+         */
+        function showToast(message, type = "success") {
+            const container = document.getElementById("toastContainer");        // Indication de l'emplacement <div> qui servira de conteneur pour les notifications.
+            const toast = document.createElement("div");                        // Création dynamique d'un nouvel élément <div> qui représentera notre notification.
 
-            // Ici on reconstruit un objet de type categorie avec les données du formulaire
+            toast.className = "toast";                                          // On ajoute la classe "toast" à ce <div>.
+            if (type === "error") toast.classList.add("error");                 // Si le type de notification est "error", on ajoute une classe CSS "error" supplémentaire.
+
+            toast.textContent = message;                                        // On met le texte fourni (message) à l’intérieur du <div>.
+            container.appendChild(toast);                                       // On ajoute le toast dans le conteneur sur la page pour qu’il devienne visible.
+
+            setTimeout(() => {toast.remove();}, 5000);                          // Suppression automatique du toast après 5000 millisecondes (5 secondes).
+            
+        }
+
+        // Quand le formulaire est soumis (submit), exécute la fonction suivante.
+        // (async (e) => { ... }) est une fonction fléchée asynchrone, ce qui permet d’utiliser await dedans, e représente l’événement déclenché par la soumission du formulaire.
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault(); // preventDefault() pour empecher le rechargement automatique de la page
+
+            // Reconstruction d'un objet de type categories avec les données du formulaire
             const data = {
-                nom: document.getElementById('nom').value,
+                nom: document.getElementById('nom').value
             };
 
-            // Ici on envoie la requête au serveur en utilisant fetch
-            // On utilise la methode POST car on veut créer une nouvelle catégorie
+            // Envoi de la requête au serveur en utilisant fetch.
             try {
                 const response = await fetch('http://localhost:3000/api/categories', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data) // On met les données dans le format JSON
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)                                  // On met les données dans le format JSON.
                 });
 
-                // Ici on récupère la réponse du serveur qu'on affiche sous forme de text
-                const result = await response.json();
-                document.getElementById('result').innerText =
-                    "Réponse serveur : " + JSON.stringify(result, null, 2);
+                const result = await response.json();                           // Récupération de la réponse du serveur.
 
+                if (response.ok) {
+                    showToast('Catégorie créée avec succès !', 'success');
+                    setTimeout(() => {window.location.href = 'getCategories.html';}, 1000);  // Après 1 seconde, on redirige l’utilisateur vers getCategories.html
+                } else {
+                    showToast('Erreur : ' + (result.error || "Impossible de créer la catégorie."), 'error');
+                }
             } catch (error) {
                 console.error("Erreur :", error);
             }
         });
     </script>
-
 </body>
 </html>
