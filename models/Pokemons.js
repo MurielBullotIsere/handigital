@@ -17,9 +17,6 @@ const pokemonsSchema = new mongoose.Schema({
         ref: 'Attaques',
         required: true
     }],
-    evolutions: [{
-        type: [String]
-    }],
     taille: {
         type: Number,
         required: true

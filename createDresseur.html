@@ -28,7 +28,7 @@
     <div class="card">
         <form id="dresseurForm">
             <div class="form-group">
-                <label for="name">Nom :</label>
+                <label for="nom">Nom :</label>
                 <input type="text" id="nom" required>
             </div>
 
@@ -45,7 +45,7 @@
                 </div>
                 <small>Vous pouvez ajouter plusieurs fois le même pokémon.</small>
 
-                <ul id="selectedPokemonList">
+                <ul id="selectedPokemonsList">
                     <li>Aucun pokémon sélectionné pour l'instant.</li>
                 </ul>
             </div>
@@ -84,10 +84,15 @@
         const form = document.getElementById('dresseurForm');
         const pokemonSelect = document.getElementById('pokemonSelect');
         const addPokemonBtn = document.getElementById('addPokemonBtn');
-        const selectedPokemonList = document.getElementById('selectedPokemonList');
+        const selectedPokemonsList = document.getElementById('selectedPokemonsList');
         const objetSelect = document.getElementById('objetSelect');
         const addObjetBtn = document.getElementById('addObjetBtn');
         const selectedObjetList = document.getElementById('selectedObjetList');
+
+        let allPokemons = [];
+        let selectedPokemons = []; // tableau d'ObjectId (string), avec doublons possibles
+        let allObjets = [];
+        let selectedObjets = [];
 
         /**
          * Affiche un message de type toast (succès ou erreur)
@@ -107,8 +112,199 @@
             setTimeout(() => {toast.remove();}, 5000);                          // Suppression automatique du toast après 5000 millisecondes (5 secondes).
         }
 
-/** Première version avant correction par rapport aux fichier createBouquet.html
- *  Dans cette version, on ne peut pas avoir des pokémons et des objets en double
+        async function loadPokemonsOptions() {
+            try {
+                const response = await fetch(API_POKEMONS);
+                const pokemons = await response.json();
+                allPokemons = Array.isArray(pokemons) ? pokemons : [];
+
+                pokemonSelect.innerHTML = '<option value="">-- Choisir un pokémon --</option>';
+
+                allPokemons.forEach(p => {
+                    const opt = document.createElement('option');
+                    opt.value = p._id;
+                    opt.textContent = `${p.nom} - (${p.types}) - ${p.attaques} - ${p.evolutions} - ${p.taille} - ${p.poids} - ${p.sexe} - ${p.description}`;
+                    pokemonSelect.appendChild(opt);
+                });
+            } catch (error) {
+                console.error(error);
+                showToast('Erreur lors du chargement des pokémons.', 'error');
+            }
+        }
+
+        async function loadObjetsOptions() {
+            try {
+                const response = await fetch(API_OBJETS);
+                const objets = await response.json();
+                allObjets = Array.isArray(objets) ? objets : [];
+
+                objetSelect.innerHTML = '<option value="">-- Choisir un objet --</option>';
+
+                allObjets.forEach(ob => {
+                    const opt = document.createElement('option');
+                    opt.value = ob._id;
+                    opt.textContent = `${ob.nom} - (${ob.categorie}) - ${ob.description}`;
+                    objetSelect.appendChild(opt);
+                });
+            } catch (error) {
+                console.error(error);
+                showToast('Erreur lors du chargement des objets.', 'error');
+            }
+        }
+
+        function refreshSelectedPokemonsList() {
+            selectedPokemonsList.innerHTML = '';
+
+            if (selectedPokemons.length === 0) {
+                selectedPokemonsList.innerHTML = '<li>Aucun pokémon sélectionné pour l\'instant.</li>';
+                return;
+            }
+
+            selectedPokemons.forEach((id, index) => {
+                const pokemon = allPokemons.find(p => p._id === id);
+                const li = document.createElement('li');
+                li.className = 'selected-pokemon-item';
+
+                const textSpan = document.createElement('span');
+                if (pokemon) {
+                    textSpan.textContent = `${index + 1}. ${pokemon.nom} - (${pokemon.types}) - ${pokemon.attaques} - ${pokemon.evolutions} - ${pokemon.taille} - ${pokemon.poids} - ${pokemon.sexe} - ${pokemon.description}`;
+                } else {
+                    textSpan.textContent = `${index + 1}. ID: ${id}`;
+                }
+
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'remove-pokemon-btn';
+                removeBtn.type = 'button';
+                removeBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+                removeBtn.onclick = () => removePokemon(index);
+
+                li.appendChild(textSpan);
+                li.appendChild(removeBtn);
+                selectedPokemonsList.appendChild(li);
+            });
+        }
+
+        function refreshSelectedObjetsList() {
+            selectedObjetList.innerHTML = '';
+
+            if (selectedObjets.length === 0) {
+                selectedObjetList.innerHTML = '<li>Aucun objet sélectionné pour l\'instant.</li>';
+                return;
+            }
+
+            selectedObjets.forEach((id, index) => {
+                const objet = allObjets.find(ob => ob._id === id);
+                const li = document.createElement('li');
+                li.className = 'selected-objet-item';
+
+                const textSpan = document.createElement('span');
+                if (objet) {
+                    textSpan.textContent = `${index + 1}. ${objet.nom} - (${objet.categorie}) - ${objet.description}`;
+                } else {
+                    textSpan.textContent = `${index + 1}. ID: ${id}`;
+                }
+
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'remove-objet-btn';
+                removeBtn.type = 'button';
+                removeBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+                removeBtn.onclick = () => removeObjet(index);
+
+                li.appendChild(textSpan);
+                li.appendChild(removeBtn);
+                selectedObjetList.appendChild(li);
+            });
+        }
+
+        function removePokemon(index) {
+            selectedPokemons.splice(index, 1);
+            refreshSelectedPokemonsList();
+        }
+
+        function removeObjet(index) {
+            selectedObjets.splice(index, 1);
+            refreshSelectedObjetsList();
+        }
+
+        addPokemonBtn.addEventListener('click', () => {
+            const selectedId = pokemonSelect.value;
+
+            if (!selectedId) {
+                showToast('Veuillez sélectionner un pokémon.', 'error');
+                return;
+            }
+
+            selectedPokemons.push(selectedId);
+            refreshSelectedPokemonsList();
+        });
+
+        addObjetBtn.addEventListener('click', () => {
+            const selectedId = objetSelect.value;
+
+            if (!selectedId) {
+                showToast('Veuillez sélectionner un objet.', 'error');
+                return;
+            }
+
+            selectedObjets.push(selectedId);
+            refreshSelectedObjetsList();
+        });
+
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault(); // On utilise preventDefault() pour empecher le rechargement de la page afin d'afficher les données intégrées
+
+/**
+            if (selectedPokemons.length === 0) {
+                showToast('Veuillez ajouter au moins un pokémon.', 'error');
+                return;
+            }
+            if (selectedObjets.length === 0) {
+                showToast('Veuillez ajouter au moins un objet.', 'error');
+                return;
+            }
+*/
+            const data = {
+                nom: document.getElementById('nom').value,
+                pokemons: selectedPokemons,
+                objets: selectedObjets
+            };
+
+            // Ici on envoie la requête au serveur en utilisant fetch
+            // On utilise la methode POST car on veut créer un nouveau dresseur
+            try {
+                const response = await fetch(API_DRESSEURS, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },        // Le header indique au serveur que ce qu'il envoie est du JSON.
+                    body: JSON.stringify(data)                              // JSON.stringify() convertit l’objet en texte JSON.
+                });
+
+                // response.json() lit le corps de la réponse et le convertit depuis du JSON vers un objet JavaScript.
+                // result devient un objet JS.
+                const result = await response.json();
+
+                if (response.ok) {
+                    showToast('Dresseur créé avec succès !', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'getDresseurs.html';
+                    }, 5000);
+                } else {
+                    showToast('Erreur : ' + (result.error || 'Impossible de créer le dresseur.'), 'error');
+                }
+            } catch (error) {
+                console.error(error);
+                showToast('Erreur lors de la communication avec le serveur.', 'error');
+            }
+        });
+
+        // init
+        loadPokemonsOptions();
+        loadObjetsOptions();
+
+
+
+/** Première version avant correction par rapport au fichier createBouquet.html.
+ *  Dans cette version, on ne peut pas avoir des pokémons et des objets en double.
         // Fonction générique pour afficher une liste de cases à cocher.
             // container : la <div> où on va mettre les cases à cocher
             // items : tableau reçu de l’API
@@ -133,8 +329,9 @@
                 container.appendChild(document.createElement('br'));                // Ajouter un saut de ligne
             });
         }
+*/
 
-
+/**    
         // Fonction déclarée comme async : utilisation de await à l’intérieur pour gérer des opérations asynchrones (fetch HTTP).
         // Charger les pokémons capturables
         async function loadPokemons() {
@@ -162,7 +359,6 @@
                 'nom'
             );
         }
-*/
 
         // Sélectionner toutes les cases cochées.
             // querySelectorAll...) retourne une NodeList, pas un tableau.
@@ -175,51 +371,31 @@
                 .map(i => i.value);             // Pour chaque case cochée (i), on récupère sa valeur (value = _id).
         }
 
-
         // Charger les données au chargement de la page
         loadPokemons();
         loadObjets();
 
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault(); // On utilise preventDefault() pour empecher le rechargement de la page afin d'afficher les données intégrées
+        // Reconstruction d'un objet de type Dresseur avec les données du formulaire
+    const data = {
+        nom: document.getElementById('nom').value,
+        // Récupérer toutes les cases cochées portant le name="pokemon".
+        // .map(...) : transformer chaque ID en un objet complet [{ pokemon: "675ab12", team: false }, ...]
+        Pokemon_captures: collectChecked('pokemon').map(
+            p => ({
+                pokemon: p,
+                team: false     // Aucun Pokémon n’est encore dans l’équipe.
+            })
+        ),
+        // Récupérer toutes les cases cochées portant le name="objet".
+        objets: collectChecked('objet')            
+    };
+        // Mettre du texte dans la <div id="result"></div> de la page HTML.
+        document.getElementById('result').innerText =
+            "Réponse serveur : " + JSON.stringify(result, null, 2);     
+                                                        // null : on n’utilise pas de fonction de transformation
+                                                                // 2 : indentation pour rendre le JSON lisible
 
-            // Reconstruction d'un objet de type Dresseur avec les données du formulaire
-            const data = {
-                nom: document.getElementById('nom').value,
-                // Récupérer toutes les cases cochées portant le name="pokemon".
-                // .map(...) : transformer chaque ID en un objet complet [{ pokemon: "675ab12", team: false }, ...]
-                Pokemon_captures: collectChecked('pokemon').map(
-                    p => ({
-                        pokemon: p,
-                        team: false     // Aucun Pokémon n’est encore dans l’équipe.
-                    })
-                ),
-                // Récupérer toutes les cases cochées portant le name="objet".
-                objets: collectChecked('objet')            
-            };
-
-            // Ici on envoie la requête au serveur en utilisant fetch
-            // On utilise la methode POST car on veut créer un nouveau dresseur
-            try {
-                const response = await fetch('http://localhost:3000/api/dresseurs', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },        // Le header indique au serveur que ce qu'il envoie est du JSON.
-                    body: JSON.stringify(data)                              // JSON.stringify() convertit l’objet en texte JSON.
-                });
-
-                // response.json() lit le corps de la réponse et le convertit depuis du JSON vers un objet JavaScript.
-                // result devient un objet JS.
-                const result = await response.json();
-
-                // Mettre du texte dans la <div id="result"></div> de la page HTML.
-                document.getElementById('result').innerText =
-                    "Réponse serveur : " + JSON.stringify(result, null, 2);     
-                                                               // null : on n’utilise pas de fonction de transformation
-                                                                     // 2 : indentation pour rendre le JSON lisible
-            } catch (error) {
-                console.error("Erreur :", error);
-            }
-        });
+*/
     </script>
 
 </body>

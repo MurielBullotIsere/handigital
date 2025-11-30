@@ -103,7 +103,8 @@
                     showToast('Erreur : ' + (result.error || "Impossible de créer l'objet."), 'error');
                 }
             } catch (error) {
-                console.error("Erreur :", error);
+            console.error('Erreur création objet :', error);
+            showToast('Erreur lors de la communication avec le serveur.', 'error');
             }
         });
     </script>

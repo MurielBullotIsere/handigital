@@ -6,11 +6,11 @@ const arenesSchema = new mongoose.Schema({
       required: true,
       trim: true        // enlève les espaces avant et après la chaîne de caractères
     },    
-    type: {
+    type: [{
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'Types',
         required: true
-    },
+    }],
     dresseurs_presents: [{
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'Dresseurs'

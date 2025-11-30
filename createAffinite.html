@@ -91,7 +91,7 @@
 
                 if (response.ok) {
                     showToast('Affinité créée avec succès !', 'success');
-                    setTimeout(() => {window.location.href = 'getAffinites.html';}, 1000);  // Après 1 seconde, on redirige l’utilisateur vers getAffinites.html
+                    setTimeout(() => {window.location.href = 'getAffinites.html';}, 5000);  // Après 5 secondes, on redirige l’utilisateur vers getAffinites.html
                 } else {
                     showToast('Erreur : ' + (result.error || "Impossible de créer l'affinité."), 'error');
                 }
@@ -103,7 +103,8 @@
                                                                      // 2 : indentation pour rendre le JSON lisible
 */
             } catch (error) {
-                console.error("Erreur :", error);
+            console.error('Erreur création affinité :', error);
+            showToast('Erreur lors de la communication avec le serveur.', 'error');
             }
         });
     </script>

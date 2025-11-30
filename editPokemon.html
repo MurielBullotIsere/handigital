@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Modifier un bouquet</title>
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+          integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"/>
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+
+<div id="toastContainer"></div>
+
+<div class="page-header">
+    <h2>Modifier un pokémon</h2>
+
+    <button class="back-btn" onclick="window.location.href='getPokemons.html'">
+        <i class="fa-solid fa-arrow-left"></i>
+        Retour à la liste
+    </button>
+</div>
+
+<div class="card">
+    <form id="pokemonForm">
+        <div class="form-group">
+            <label for="nom">Nom du pokémon : </label>
+            <input type="text" id="nom" required>
+        </div>
+
+        <div class="form-group">
+            <label>Types : </label>
+            <div class="inline-group">
+                <select id="typeSelect">
+                    <option value="">-- Choisir un type --</option>
+                </select>
+                <button type="button" class="add-type-btn" id="addTypeBtn">
+                    <i class="fa-solid fa-plus"></i>
+                    Ajouter
+                </button>
+            </div>
+
+            <ul id="selectedTypesList">
+                <li>Chargement...</li>
+            </ul>
+        </div>
+
+        <div class="form-group">
+            <label>Types : </label>
+            <div class="inline-group">
+                <select id="typeSelect">
+                    <option value="">-- Choisir un type --</option>
+                </select>
+                <button type="button" class="add-type-btn" id="addTypeBtn">
+                    <i class="fa-solid fa-plus"></i>
+                    Ajouter
+                </button>
+            </div>
+
+            <ul id="selectedTypesList">
+                <li>Chargement...</li>
+            </ul>
+        </div>
+
+
+        <div class="form-group">
+            <label for="taille">Taille : </label>
+            <input type="number" id="taille" required min="0">
+        </div>
+
+        <div class="form-group">
+            <label for="poids">Poids : </label>
+            <input type="number" id="poids" required min="0">
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description : </label>
+            <textarea id="description" rows="3"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Fleurs du bouquet</label>
+            <div class="inline-group">
+                <select id="fleurSelect">
+                    <option value="">-- Choisir une fleur --</option>
+                </select>
+                <button type="button" class="add-flower-btn" id="addFleurBtn">
+                    <i class="fa-solid fa-plus"></i>
+                    Ajouter
+                </button>
+            </div>
+            <small>Vous pouvez ajouter plusieurs fois la même fleur.</small>
+
+            <ul id="selectedFleursList">
+                <li>Chargement...</li>
+            </ul>
+        </div>
+
+        <button type="submit" class="submit-btn">
+            <i class="fa-regular fa-pen-to-square"></i>
+            Mettre à jour
+        </button>
+    </form>
+</div>
+
+<script>
+    const API_BOUQUETS = 'http://localhost:3000/api/bouquets';
+    const API_FLEURS = 'http://localhost:3000/api/fleurs';
+
+    const form = document.getElementById('editBouquetForm');
+    const fleurSelect = document.getElementById('fleurSelect');
+    const addFleurBtn = document.getElementById('addFleurBtn');
+    const selectedFleursList = document.getElementById('selectedFleursList');
+
+    let allFleurs = [];
+    let selectedFleurs = []; // tableau d'ObjectId (string), doublons possibles
+
+    function showToast(message, type = "success") {
+        const container = document.getElementById("toastContainer");
+        const toast = document.createElement("div");
+
+        toast.className = "toast";
+        if (type === "error") toast.classList.add("error");
+
+        toast.textContent = message;
+        container.appendChild(toast);
+
+        setTimeout(() => {
+            toast.remove();
+        }, 5000);
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const bouquetId = params.get('id');
+
+    if (!bouquetId) {
+        showToast("Aucun ID de bouquet fourni dans l'URL.", "error");
+        form.style.display = 'none';
+    } else {
+        init();
+    }
+
+    async function loadFleursOptions() {
+        try {
+            const response = await fetch(API_FLEURS);
+            const fleurs = await response.json();
+            allFleurs = Array.isArray(fleurs) ? fleurs : [];
+
+            fleurSelect.innerHTML = '<option value="">-- Choisir une fleur --</option>';
+
+            allFleurs.forEach(f => {
+                const opt = document.createElement('option');
+                opt.value = f._id;
+                opt.textContent = `${f.name} (${f.color}) - ${f.price}€`;
+                fleurSelect.appendChild(opt);
+            });
+        } catch (error) {
+            console.error(error);
+            showToast("Erreur lors du chargement des fleurs.", "error");
+        }
+    }
+
+    function refreshSelectedFleursList() {
+        selectedFleursList.innerHTML = '';
+
+        if (selectedFleurs.length === 0) {
+            selectedFleursList.innerHTML = '<li>Aucune fleur sélectionnée pour l\'instant.</li>';
+            return;
+        }
+
+        selectedFleurs.forEach((id, index) => {
+            const fleur = allFleurs.find(f => f._id === id);
+            const li = document.createElement('li');
+            li.className = 'selected-flower-item';
+
+            const textSpan = document.createElement('span');
+            if (fleur) {
+                textSpan.textContent = `${index + 1}. ${fleur.name} (${fleur.color}) - ${fleur.price}€`;
+            } else {
+                textSpan.textContent = `${index + 1}. ID: ${id}`;
+            }
+
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-flower-btn';
+            removeBtn.type = 'button';
+            removeBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+            removeBtn.onclick = () => removeFleurEdit(index);
+
+            li.appendChild(textSpan);
+            li.appendChild(removeBtn);
+            selectedFleursList.appendChild(li);
+        });
+    }
+
+    function removeFleurEdit(index) {
+        selectedFleurs.splice(index, 1);
+        refreshSelectedFleursList();
+    }
+
+    async function loadBouquet() {
+        try {
+            const response = await fetch(`${API_BOUQUETS}/${bouquetId}`);
+            const bouquet = await response.json();
+
+            if (!response.ok || !bouquet) {
+                showToast("Impossible de charger ce bouquet.", "error");
+                form.style.display = 'none';
+                return;
+            }
+
+            document.getElementById('name').value = bouquet.name || '';
+            document.getElementById('price').value = bouquet.price || 0;
+            document.getElementById('description').value = bouquet.description || '';
+
+            if (Array.isArray(bouquet.fleurs) && bouquet.fleurs.length > 0) {
+                selectedFleurs = bouquet.fleurs.map(f => (f && f._id) ? f._id : f);
+            } else {
+                selectedFleurs = [];
+            }
+
+            refreshSelectedFleursList();
+        } catch (error) {
+            console.error(error);
+            showToast("Erreur lors du chargement du bouquet.", "error");
+            form.style.display = 'none';
+        }
+    }
+
+    addFleurBtn.addEventListener('click', () => {
+        const selectedId = fleurSelect.value;
+
+        if (!selectedId) {
+            showToast('Veuillez sélectionner une fleur.', 'error');
+            return;
+        }
+
+        selectedFleurs.push(selectedId);
+        refreshSelectedFleursList();
+    });
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        if (selectedFleurs.length === 0) {
+            showToast('Veuillez ajouter au moins une fleur au bouquet.', 'error');
+            return;
+        }
+
+        const data = {
+            name: document.getElementById('name').value,
+            price: Number(document.getElementById('price').value),
+            description: document.getElementById('description').value,
+            fleurs: selectedFleurs
+        };
+
+        try {
+            const response = await fetch(`${API_BOUQUETS}/${bouquetId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                showToast("Bouquet mis à jour avec succès !");
+                setTimeout(() => {
+                    window.location.href = 'getBouquets.html';
+                }, 1000);
+            } else {
+                showToast('Erreur : ' + (result.error || 'Impossible de mettre à jour le bouquet.'), 'error');
+            }
+        } catch (error) {
+            console.error(error);
+            showToast("Erreur de communication avec le serveur.", "error");
+        }
+    });
+
+    async function init() {
+        await loadFleursOptions();
+        await loadBouquet();
+    }
+</script>
+
+</body>
+</html>

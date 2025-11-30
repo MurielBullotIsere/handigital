@@ -6,11 +6,11 @@ const attaquesSchema = new mongoose.Schema({
       required: true,
       trim: true        // enlève les espaces avant et après la chaîne de caractères
     },    
-    type: {
+    type: [{
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'Types',
         required: true
-    },
+    }],
     puissance: {
         type: Number,
         required: true
