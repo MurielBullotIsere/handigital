@@ -81,7 +81,7 @@
 
             // Envoi de la requête au serveur en utilisant fetch.
             try {
-                const response = await fetch('http://localhost:3000/api/affinites', {
+                const response = await fetch(API_BASE_URL, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(data)                                  // On met les données dans le format JSON.
@@ -91,7 +91,9 @@
 
                 if (response.ok) {
                     showToast('Affinité créée avec succès !', 'success');
-                    setTimeout(() => {window.location.href = 'getAffinites.html';}, 5000);  // Après 5 secondes, on redirige l’utilisateur vers getAffinites.html
+                    setTimeout(() => {
+                        window.location.href = 'getAffinites.html';
+                    }, 5000);  // Après 5 secondes, on redirige l’utilisateur vers getAffinites.html
                 } else {
                     showToast('Erreur : ' + (result.error || "Impossible de créer l'affinité."), 'error');
                 }
