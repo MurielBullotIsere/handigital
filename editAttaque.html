@@ -14,242 +14,244 @@
 </head>
 <body>
 
-<div id="toastContainer"></div>
+    <div id="toastContainer"></div>
 
-<div class="page-header">
-    <h2>Modifier une attaque</h2>
+    <div class="page-header">
+        <h2>Créer une nouvelle attaque</h2>
 
-    <button class="back-btn" onclick="window.location.href='getAttaques.html'">
-        <i class="fa-solid fa-arrow-left"></i>
-        Retour à la liste
-    </button>
-</div>
-
-<div class="card">
-    <form id="attaqueForm">
-        <div class="form-group">
-            <label for="nom">Nom de l'attaque : </label>
-            <input type="text" id="nom" required>
-        </div>
-
-        <div class="form-group">
-            <label>Types : </label>
-            <div class="inline-group">
-                <select id="typeSelect">
-                    <option value="">-- Choisir un type --</option>
-                </select>
-                <button type="button" class="add-type-btn" id="addTypeBtn">
-                    <i class="fa-solid fa-plus"></i>
-                    Ajouter
-                </button>
+        <button class="back-btn" onclick="window.location.href='getAttaques.html'">
+            <i class="fa-solid fa-arrow-left"></i>
+            Retour à la liste
+        </button>
+    </div>
+    
+    <div class="card">
+        <form id="attaqueForm">
+            <div class="form-group">
+                <label for="nom">Nom :</label>
+                <input type="text" id="nom" required>
             </div>
 
-            <ul id="selectedTypesList">
-                <li>Chargement...</li>
-            </ul>
-        </div>
+            <div class="form-group">
+                <label>Type :</label>
+                <div class="inline-group">
+                    <select id="typeSelect">
+                        <option value="">-- Choisir un type --</option>
+                    </select>
+                    <button type="button" class="add-type-btn" id="addTypeBtn">
+                        <i class="fa-solid fa-plus"></i>
+                        Ajouter
+                    </button>
+                </div>
 
-        <div class="form-group">
-            <label for="puissance">Puissance : </label>
-            <input type="number" id="puissance" required min="0">
-        </div>
+                <ul id="selectedTypesList">
+                    <li>Aucun type sélectionné pour l'instant.</li>
+                </ul>
+            </div>
 
-        <div class="form-group">
-            <label for="precision">Précision : </label>
-            <input type="number" id="precision" required min="0">
-        </div>
+            <div class="form-group">
+                <label for="puissance">Puissance :</label>
+                <input type="Number" id="puissance" required min="0">
+            </div>
+            <div class="form-group">
+                <label for="precision">Précision :</label>
+                <input type="Number" id="precision" required min="0">
+            </div>
+            <div class="form-group">
+                <label for="description">Description :</label>
+                <input type="text" id="description" required>
+            </div>
 
-        <div class="form-group">
-            <label for="description">Description : </label>
-            <textarea id="description" rows="3"></textarea>
-        </div>
+            <button type="submit" class="submit-btn">
+                <i class="fa-solid fa-plus"></i>
+                Créer l'attaque
+            </button>
+        </form>
+    </div>
 
+    <script>
+        const API_ATTAQUES = 'http://localhost:3000/api/attaques';     // Définition d'une variable constante qui contient l’adresse de base de l'API. Utilisation : ${API_BASE_URL}
+        const API_TYPES = 'http://localhost:3000/api/types';     // Définition d'une variable constante qui contient l’adresse de base de l'API. Utilisation : ${API_BASE_URL}
+        const form = document.getElementById('attaqueForm');
 
-        <button type="submit" class="submit-btn">
-            <i class="fa-regular fa-pen-to-square"></i>
-            Mettre à jour
-        </button>
-    </form>
-</div>
+        const typeSelect = document.getElementById('typeSelect');
+        const addTypeBtn = document.getElementById('addTypeBtn');
+        const selectedTypesList = document.getElementById('selectedTypesList');
 
-<script>
-    const API_BOUQUETS = 'http://localhost:3000/api/bouquets';
-    const API_FLEURS = 'http://localhost:3000/api/fleurs';
+        let allTypes = [];
+        let selectedTypes = []; // tableau d'ObjectId (string), avec doublons possibles
 
-    const form = document.getElementById('editBouquetForm');
-    const fleurSelect = document.getElementById('fleurSelect');
-    const addFleurBtn = document.getElementById('addFleurBtn');
-    const selectedFleursList = document.getElementById('selectedFleursList');
+        function showToast(message, type = "success") {
+            const container = document.getElementById("toastContainer");        // Indication de l'emplacement <div> qui servira de conteneur pour les notifications.
+            const toast = document.createElement("div");                        // Création dynamique d'un nouvel élément <div> qui représentera notre notification.
 
-    let allFleurs = [];
-    let selectedFleurs = []; // tableau d'ObjectId (string), doublons possibles
+            toast.className = "toast";                                          // On ajoute la classe "toast" à ce <div>.
+            if (type === "error") toast.classList.add("error");                 // Si le type de notification est "error", on ajoute une classe CSS "error" supplémentaire.
 
-    function showToast(message, type = "success") {
-        const container = document.getElementById("toastContainer");
-        const toast = document.createElement("div");
+            toast.textContent = message;                                        // On met le texte fourni (message) à l’intérieur du <div>.
+            container.appendChild(toast);                                       // On ajoute le toast dans le conteneur sur la page pour qu’il devienne visible.
 
-        toast.className = "toast";
-        if (type === "error") toast.classList.add("error");
-
-        toast.textContent = message;
-        container.appendChild(toast);
-
-        setTimeout(() => {
-            toast.remove();
-        }, 5000);
-    }
-
-    const params = new URLSearchParams(window.location.search);
-    const bouquetId = params.get('id');
-
-    if (!bouquetId) {
-        showToast("Aucun ID de bouquet fourni dans l'URL.", "error");
-        form.style.display = 'none';
-    } else {
-        init();
-    }
-
-    async function loadFleursOptions() {
-        try {
-            const response = await fetch(API_FLEURS);
-            const fleurs = await response.json();
-            allFleurs = Array.isArray(fleurs) ? fleurs : [];
-
-            fleurSelect.innerHTML = '<option value="">-- Choisir une fleur --</option>';
-
-            allFleurs.forEach(f => {
-                const opt = document.createElement('option');
-                opt.value = f._id;
-                opt.textContent = `${f.name} (${f.color}) - ${f.price}€`;
-                fleurSelect.appendChild(opt);
-            });
-        } catch (error) {
-            console.error(error);
-            showToast("Erreur lors du chargement des fleurs.", "error");
-        }
-    }
-
-    function refreshSelectedFleursList() {
-        selectedFleursList.innerHTML = '';
-
-        if (selectedFleurs.length === 0) {
-            selectedFleursList.innerHTML = '<li>Aucune fleur sélectionnée pour l\'instant.</li>';
-            return;
+            setTimeout(() => {toast.remove();}, 5000);                          // Suppression automatique du toast après 5000 millisecondes (5 secondes).
+            
         }
 
-        selectedFleurs.forEach((id, index) => {
-            const fleur = allFleurs.find(f => f._id === id);
-            const li = document.createElement('li');
-            li.className = 'selected-flower-item';
+        const params = new URLSearchParams(window.location.search);
+        const attaqueId = params.get('id');
 
-            const textSpan = document.createElement('span');
-            if (fleur) {
-                textSpan.textContent = `${index + 1}. ${fleur.name} (${fleur.color}) - ${fleur.price}€`;
-            } else {
-                textSpan.textContent = `${index + 1}. ID: ${id}`;
+        if (!attaqueId) {
+            showToast("Aucun ID d'attaque fourni dans l'URL.", "error");
+            form.style.display = 'none';
+        } else {
+            init();
+        }
+
+        async function loadTypesOptions() {
+            try {
+                const response = await fetch(API_TYPES);
+                const types = await response.json();
+                allTypes = Array.isArray(types) ? types : [];
+
+                typeSelect.innerHTML = '<option value="">-- Choisir un type --</option>';
+
+                allTypes.forEach(t => {
+                    const opt = document.createElement('option');
+                    opt.value = t._id;
+                    opt.textContent = `${t.nom}`;
+                    typeSelect.appendChild(opt);
+                });
+            } catch (error) {
+                console.error(error);
+                showToast('Erreur lors du chargement des types.', 'error');
             }
+        }
 
-            const removeBtn = document.createElement('button');
-            removeBtn.className = 'remove-flower-btn';
-            removeBtn.type = 'button';
-            removeBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
-            removeBtn.onclick = () => removeFleurEdit(index);
+        function refreshSelectedTypesList() {
+            selectedTypesList.innerHTML = '';
 
-            li.appendChild(textSpan);
-            li.appendChild(removeBtn);
-            selectedFleursList.appendChild(li);
-        });
-    }
-
-    function removeFleurEdit(index) {
-        selectedFleurs.splice(index, 1);
-        refreshSelectedFleursList();
-    }
-
-    async function loadBouquet() {
-        try {
-            const response = await fetch(`${API_BOUQUETS}/${bouquetId}`);
-            const bouquet = await response.json();
-
-            if (!response.ok || !bouquet) {
-                showToast("Impossible de charger ce bouquet.", "error");
-                form.style.display = 'none';
+            if (selectedTypes.length === 0) {
+                selectedTypesList.innerHTML = '<li>Aucun type sélectionné pour l\'instant.</li>';
                 return;
             }
 
-            document.getElementById('name').value = bouquet.name || '';
-            document.getElementById('price').value = bouquet.price || 0;
-            document.getElementById('description').value = bouquet.description || '';
+            selectedTypes.forEach((id, index) => {
+                const type = allTypes.find(t => t._id === id);
+                const li = document.createElement('li');
+                li.className = 'selected-type-item';
 
-            if (Array.isArray(bouquet.fleurs) && bouquet.fleurs.length > 0) {
-                selectedFleurs = bouquet.fleurs.map(f => (f && f._id) ? f._id : f);
-            } else {
-                selectedFleurs = [];
-            }
+                const textSpan = document.createElement('span');
+                if (type) {
+                    textSpan.textContent = `${index + 1}. ${type.nom}`;
+                } else {
+                    textSpan.textContent = `${index + 1}. ID: ${id}`;
+                }
 
-            refreshSelectedFleursList();
-        } catch (error) {
-            console.error(error);
-            showToast("Erreur lors du chargement du bouquet.", "error");
-            form.style.display = 'none';
-        }
-    }
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'remove-type-btn';
+                removeBtn.type = 'button';
+                removeBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+                removeBtn.onclick = () => removeType(index);
 
-    addFleurBtn.addEventListener('click', () => {
-        const selectedId = fleurSelect.value;
-
-        if (!selectedId) {
-            showToast('Veuillez sélectionner une fleur.', 'error');
-            return;
-        }
-
-        selectedFleurs.push(selectedId);
-        refreshSelectedFleursList();
-    });
-
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        if (selectedFleurs.length === 0) {
-            showToast('Veuillez ajouter au moins une fleur au bouquet.', 'error');
-            return;
-        }
-
-        const data = {
-            name: document.getElementById('name').value,
-            price: Number(document.getElementById('price').value),
-            description: document.getElementById('description').value,
-            fleurs: selectedFleurs
-        };
-
-        try {
-            const response = await fetch(`${API_BOUQUETS}/${bouquetId}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
+                li.appendChild(textSpan);
+                li.appendChild(removeBtn);
+                selectedTypesList.appendChild(li);
             });
-
-            const result = await response.json();
-
-            if (response.ok) {
-                showToast("Bouquet mis à jour avec succès !");
-                setTimeout(() => {
-                    window.location.href = 'getBouquets.html';
-                }, 1000);
-            } else {
-                showToast('Erreur : ' + (result.error || 'Impossible de mettre à jour le bouquet.'), 'error');
-            }
-        } catch (error) {
-            console.error(error);
-            showToast("Erreur de communication avec le serveur.", "error");
         }
-    });
 
-    async function init() {
-        await loadFleursOptions();
-        await loadBouquet();
-    }
-</script>
+        function removeType(index) {
+            selectedTypes.splice(index, 1);
+            refreshSelectedTypesList();
+        }
+
+        async function loadAttaque() {
+            try {
+                const response = await fetch(`${API_ATTAQUES}/${attaqueId}`);
+                const attaque = await response.json();
+
+                if (!response.ok || !attaque) {
+                    showToast("Impossible de charger cette attaque.", "error");
+                    form.style.display = 'none';
+                    return;
+                }
+
+                document.getElementById('nom').value = attaque.nom || '';
+
+                if (Array.isArray(attaque.type) && attaque.type.length > 0) {
+                    selectedTypes = attaque.type.map(t => (t && t._id) ? t._id : t);
+                } else {
+                    selectedTypes = [];
+                }
+
+                document.getElementById('puissance').value = attaque.puissance || '';
+                document.getElementById('precision').value = attaque.precision || '';
+                document.getElementById('description').value = attaque.description || '';
+
+                refreshSelectedTypesList();
+            } catch (error) {
+                console.error(error);
+                showToast("Erreur lors du chargement de l'attaque.", "error");
+                form.style.display = 'none';
+            }
+        }
+
+        addTypeBtn.addEventListener('click', () => {
+            const selectedId = typeSelect.value;
+
+            if (!selectedId) {
+                showToast('Veuillez sélectionner un type.', 'error');
+                return;
+            }
+
+            selectedTypes.push(selectedId);
+            refreshSelectedTypesList();
+        });
+
+    // Quand le formulaire est soumis (submit), exécute la fonction suivante.
+        // (async (e) => { ... }) est une fonction fléchée asynchrone, ce qui permet d’utiliser await dedans, e représente l’événement déclenché par la soumission du formulaire.
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault(); // preventDefault() pour empecher le rechargement automatique de la page
+
+            if (selectedTypes.length === 0) {
+                showToast('Veuillez ajouter au moins un type.', 'error');
+                return;
+            }
+
+            // Reconstruction d'un objet de type affinites avec les données du formulaire
+            const data = {
+                nom: document.getElementById('nom').value,
+                type: selectedTypes,
+                puissance: Number(document.getElementById('puissance').value),
+                precision: Number(document.getElementById('precision').value),
+                description: document.getElementById('description').value
+            };
+
+            // Envoi de la requête au serveur en utilisant fetch.
+            try {
+                const response = await fetch(API_ATTAQUES, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)                                  // On met les données dans le format JSON.
+                });
+
+                const result = await response.json();                           // Récupération de la réponse du serveur.
+
+                if (response.ok) {
+                    showToast('Attaque créée avec succès !', 'success');
+                    setTimeout(() => {window.location.href = 'getAttaques.html';}, 5000);  // Après 5 secondes, on redirige l’utilisateur vers getAffinites.html
+                } else {
+                    showToast('Erreur : ' + (result.error || "Impossible de créer l'attaque."), 'error');
+                }
+            } catch (error) {
+            console.error('Erreur création attaque :', error);
+            showToast('Erreur lors de la communication avec le serveur.', 'error');
+            }
+        });
+
+        async function init() {
+            await loadTypesOptions();
+            await loadAttaque();
+        }
+
+    </script>
 
 </body>
 </html>

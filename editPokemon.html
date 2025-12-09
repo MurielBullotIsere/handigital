@@ -66,6 +66,22 @@
             </ul>
         </div>
 
+        <div class="form-group">
+            <label>Attaques :</label>
+            <div class="inline-group">
+                <select id="attaqueSelect">
+                    <option value="">-- Choisir une attaque --</option>
+                </select>
+                <button type="button" class="add-type-btn" id="addAttaqueBtn">
+                    <i class="fa-solid fa-plus"></i>
+                    Ajouter
+                </button>
+            </div>
+
+            <ul id="selectedAttaquesList">
+                <li>Aucun attaque définie pour l'instant.</li>
+            </ul>
+        </div>
 
         <div class="form-group">
             <label for="taille">Taille : </label>
@@ -78,26 +94,16 @@
         </div>
 
         <div class="form-group">
-            <label for="description">Description : </label>
-            <textarea id="description" rows="3"></textarea>
-        </div>
-
-        <div class="form-group">
-            <label>Fleurs du bouquet</label>
-            <div class="inline-group">
-                <select id="fleurSelect">
-                    <option value="">-- Choisir une fleur --</option>
-                </select>
-                <button type="button" class="add-flower-btn" id="addFleurBtn">
-                    <i class="fa-solid fa-plus"></i>
-                    Ajouter
-                </button>
-            </div>
-            <small>Vous pouvez ajouter plusieurs fois la même fleur.</small>
-
-            <ul id="selectedFleursList">
-                <li>Chargement...</li>
-            </ul>
+            <label>Sexe : </label><br>
+            <!-- boutons radio -->
+            <label>
+                <input type="radio" name="sexe" value="false" checked>      <!-- false → sélectionnée par défaut -->
+                Mâle
+            </label>
+            <label style="margin-left: 10px;">
+                <input type="radio" name="sexe" value="true">
+                Femelle
+            </label>
         </div>
 
         <button type="submit" class="submit-btn">
