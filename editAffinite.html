@@ -18,7 +18,7 @@
     <div class="page-header">
         <h2>Modifier une affinité</h2>
 
-        <button class="back-btn" onclick="window.location.href='getAffinites.html'">
+        <button class="back-btn" onclick="window.location.href='getAffiniteList.html'">
             <i class="fa-solid fa-arrow-left"></i>
             Retour à la liste
         </button>
@@ -118,7 +118,7 @@
             if (response.ok) {
                 showToast("Affinité mise à jour avec succès !");
                 setTimeout(() => {
-                    window.location.href = "getAffinite.html";
+                    window.location.href = "getAffiniteList.html";
                 }, 1000);
             } else {
                 showToast("Erreur : " + (result.error || "Impossible de mettre à jour"), "error");

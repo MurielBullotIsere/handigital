@@ -1,10 +1,10 @@
-# apprentissage de node.js et Mongo.db
+# Apprentissage de node.js et Mongo.db
 
-## création du package.json
+## Création du package.json
 ```bash
 npm init -y
 ```
-## installation de nodemon (package-lock.json)  
+## Installation de nodemon (package-lock.json)  
 /node_modules s'installe quand on utilise la commande install
 ```bash
 npm install nodemon
@@ -12,6 +12,10 @@ npm install nodemon
 ## Installation de express 
 ```bash
 npm install express
+```
+## Installation de cors 
+```bash
+npm install cors
 ```
 ## Pour avoir les détails  
 ```bash
@@ -21,3 +25,5 @@ npm fund
 ```bash
 npm install mongoose
 ```
+## Ajouter une ID dans une adresse URL
+A la fin de l'URL, ajouter **?id=** puis l'ID  

@@ -3,16 +3,27 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "Voir Cours.pdf dans le dossier C:\\01MURIEL\\00-formation2025-2027\\node.jsThomas.  \r Lancer MangoDB Compass qui se trouve sur le bureau : selectionner localhost:27017.  \r Dans le terminal, lancer la commande nodemon server.js.",
   "dependencies": {
     "cors": "^2.8.5",
-    "express": "^5.1.0",
-    "mongoose": "^8.19.4",
+    "express": "^5.2.1",
+    "mongoose": "^8.20.2",
     "nodemon": "^3.1.11"
-  }
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MurielBullotIsere/handigital.git"
+  },
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/MurielBullotIsere/handigital/issues"
+  },
+  "homepage": "https://github.com/MurielBullotIsere/handigital#readme"
 }

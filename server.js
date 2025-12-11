@@ -18,6 +18,10 @@ app.use('/api/objets', require('./routes/objets'));
 app.use('/api/pokemons', require('./routes/pokemons'));
 app.use('/api/types', require('./routes/types'));
 
+app.get('/', (req, res) => {
+    res.send('Bienvenue dans l\'application Pokedex');
+});
+
 app.listen(3000, () => {
     console.log('Server is running on http://localhost:3000');
 });
