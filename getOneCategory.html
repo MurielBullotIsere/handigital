@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Détails  d'une affinité</title>
+    <title>Détails  d'une catégorie</title>
         <!-- Charger la bibliothèque d’icônes Font Awesome depuis un CDN (Cloudflare), 
              Avec vérification de sécurité (SRI) (integrity)
              Sans fuite de données (referrer + crossorigin)  -->
@@ -16,10 +16,10 @@
 
 <body>
     <div class="page-header">
-        <h2>Détails d'une affinité</h2>
+        <h2>Détails d'une catégorie</h2>
 
         <div class="header-actions">
-            <button class="back-btn" onclick="window.location.href='getAffiniteList.html'">
+            <button class="back-btn" onclick="window.location.href='getCategoryList.html'">
                 <i class="fa-solid fa-arrow-left"></i>
                 Retour à la liste
             </button>
@@ -34,35 +34,31 @@
         <div class="field-label">Nom</div>
         <div class="field-value" id="nameValue">Chargement...</div>
 
-        <div class="field-label">Description</div>
-        <div class="field-value" id="descriptionValue">Chargement...</div>
     </div>
 
     <div id="message"></div>
 
     <script>
-        const API_BASE_URL = 'http://localhost:3000/api/affinites';
+        const API_BASE_URL = 'http://localhost:3000/api/categories';
 
         const nameValue  = document.getElementById('nameValue');
-        const descriptionValue = document.getElementById('descriptionValue');
         const messageDiv = document.getElementById('message');
         const editBtn    = document.getElementById('editBtn');
 
         const params = new URLSearchParams(window.location.search);
-        const affiniteId = params.get('id');
+        const categoryId = params.get('id');
 
-        if (!affiniteId) {
+        if (!categoryId) {
             messageDiv.style.color = 'red';
             messageDiv.textContent = 'Aucune ID fournie dans l’URL.';
             nameValue.textContent  = '-';
-            descriptionValue.textContent = '-';
             editBtn.disabled = true;
         } else {
             editBtn.addEventListener('click', () => {
-                window.location.href = `editAffinite.html?id=${affiniteId}`;
+                window.location.href = `editCategory.html?id=${categoryId}`;
             });
 
-            loadAffinite();
+            loadCategory();
         }
 
         /**
@@ -70,28 +66,25 @@
          * En cas d'erreur, un message d'erreur est affiché et les valeurs sont
          * initialisées à "-".
          */
-        async function loadAffinite() {
+        async function loadCategory() {
             try {
-                const response = await fetch(`${API_BASE_URL}/${affiniteId}`);
-                const affinite = await response.json();
+                const response = await fetch(`${API_BASE_URL}/${categoryId}`);
+                const category = await response.json();
 
-                if (!response.ok || !affinite) {
+                if (!response.ok || !category) {
                     messageDiv.style.color = 'red';
-                    messageDiv.textContent = 'Impossible de charger cette affinité.';
+                    messageDiv.textContent = 'Impossible de charger cette catégorie.';
                     nameValue.textContent  = '-';
-                    descriptionValue.textContent = '-';
                     return;
                 }
 
-                nameValue.textContent  = affinite.nom  ?? '-';
-                descriptionValue.textContent = affinite.description ?? '-';
+                nameValue.textContent  = category.nom  ?? '-';
 
             } catch (error) {
-                console.error('Erreur chargement affinité :', error);
+                console.error('Erreur chargement catégorie :', error);
                 messageDiv.style.color = 'red';
-                messageDiv.textContent = 'Erreur lors du chargement de l\'affinité.';
+                messageDiv.textContent = 'Erreur lors du chargement de la catégorie.';
                 nameValue.textContent  = '-';
-                descriptionValue.textContent = '-';
             }
         }
     </script>
