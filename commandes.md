@@ -27,3 +27,8 @@ npm install mongoose
 ```
 ## Ajouter une ID dans une adresse URL
 A la fin de l'URL, ajouter **?id=** puis l'ID  
+
+## Gérer les problèmes de connection à MongoDB
+Aller dans Menu Démarrer → taper “Services” → Ouvrir Services  
+Cliquer sur MongoDB Server (MongoDB)  
+Cliquer sur Démarrer de la colonne de gauche  
