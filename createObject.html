@@ -202,8 +202,9 @@
                 if (response.ok) {
                     showToast('Succès de la création', 'success');
                     setTimeout(() => {
+// CHANGER L'ADRESSE
                         window.location.href = 'getObjectList.html';
-                    }, 1000);  // Après 5 secondes, on redirige l’utilisateur vers getObjectList.html
+                    }, 1000);  // Après 1 seconde, on redirige l’utilisateur vers le fichier .html
                 } else {
                     showToast('Erreur : ' + (result.error || "Impossible d'enregistrer"), 'error');
                 }
