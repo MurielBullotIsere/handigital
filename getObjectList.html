@@ -80,7 +80,6 @@
                 const dataJson = await dataResponse.json();
 
                 tbody.innerHTML = "";
-                // sousEnsemble1List.innerHTML = '<li>-</li>';
 
                 if (!Array.isArray(dataJson) || dataJson.length === 0) {
                     tbody.innerHTML = `<tr><td colspan="4">${messageAucun}</td></tr>`;
@@ -89,7 +88,7 @@
 
                 dataJson.forEach(item => {
                     const tr = document.createElement("tr");
-
+// CHANGER, LORS D'UNE COPIE, LES NOMS DES CHAMPS DU TABLEAU
                     tr.innerHTML = `
                         <td>${item.nom}</td>
                         <td>${item.description}</td> 

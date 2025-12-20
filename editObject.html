@@ -62,7 +62,7 @@
     </div>
 
     <script>
-        const API_BASE_URL = 'http://localhost:3000/api/objets';     // Définition d'une variable constante qui contient l’adresse de base de l'API. Utilisation : ${API_BASE_URL}
+        const API_BASE_URL = 'http://localhost:3000/api/objets';
         const API_SUBCLASS = 'http://localhost:3000/api/categories';
 
         const form = document.getElementById('componentForm');
@@ -97,7 +97,7 @@
         // Ici on s'assure que l'utilisateur a fourni un ID dans l'URL
         // S'il n'a pas fourni un ID, on affiche un message d'erreur
         const params = new URLSearchParams(window.location.search);
-        const dataId = params.get('id');                          // objectId  bouquetId
+        const dataId = params.get('id');
 
         if (!dataId) {
             showToast("Aucun ID fourni dans l'URL.", "error");
@@ -110,9 +110,9 @@
             try {
                 const dataResponse = await fetch(API_SUBCLASS);
                 const dataJson = await dataResponse.json();
-                allSubclassItem = Array.isArray(dataJson) ? dataJson : [];   //  allFleurs
+                allSubclassItem = Array.isArray(dataJson) ? dataJson : [];
 
-                subclassSelect.innerHTML = `<option value="">${messageChoisir}</option>`;   // fleurSelect
+                subclassSelect.innerHTML = `<option value="">${messageChoisir}</option>`;
 
                 allSubclassItem.forEach(si => {
                     const opt = document.createElement('option');
