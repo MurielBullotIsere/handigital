@@ -66,9 +66,9 @@
         const API_SUBCLASS = 'http://localhost:3000/api/categories';
 
         const form = document.getElementById('componentForm');
-        const subclassSelect = document.getElementById('subclassSelect');  // fleurSelect
-        const addSubclassBtn = document.getElementById('addSubclassBtn');  // addFleurBtn
-        const selectedSubclassList = document.getElementById('selectedSubclassList');  // selectedFleursList
+        const subclassSelect = document.getElementById('subclassSelect');
+        const addSubclassBtn = document.getElementById('addSubclassBtn');
+        const selectedSubclassList = document.getElementById('selectedSubclassList');
 
         const messageChoisir = "-- Choisir une catégorie --";
         const messageErreurSubclass = "Erreur lors du chargement des catégories";
@@ -78,8 +78,8 @@
         const messageImpossible = "Impossible de charger cet objet.";
         const messageErreurComponent = "Erreur lors du chargement de l'objet";
 
-        let allSubclassItem = [];       // allCategories  allFleurs
-        let selectedAllItemId = [];     // selectedCategories  selectedFleurs    tableau d'ObjectId (string), avec doublons possibles
+        let allSubclassItem = []; 
+        let selectedAllItemId = [];     // tableau d'ObjectId (string), avec doublons possibles
 
         function showToast(message, type = "success") {
             const container = document.getElementById("toastContainer");        // Indication de l'emplacement <div> qui servira de conteneur pour les notifications.
@@ -117,7 +117,8 @@
                 allSubclassItem.forEach(si => {
                     const opt = document.createElement('option');
                     opt.value = si._id;
-                    opt.textContent = si.nom;
+// CHANGER, LORS D'UNE COPIE, nom PAR LES NOMS DES CHAMPS DU TABLEAU
+                    opt.textContent = si.nom;  // `${si.nom}`
                     subclassSelect.appendChild(opt);
                 });
             } catch (error) {
@@ -126,7 +127,6 @@
             }
         }
 
-        // refreshSelectedFleursList
         function refreshSelectedSubclassList() {
             selectedSubclassList.innerHTML = '';
 
@@ -138,10 +138,11 @@
             selectedAllItemId.forEach((id, index) => {
                 const item = allSubclassItem.find(si => si._id === id);
                 const li = document.createElement('li');
-                li.className = 'selected-subclass-item';     //   selected-flower-item
+                li.className = 'selected-subclass-item';
 
                 const textSpan = document.createElement('span');
                 if (item) {
+// CHANGER, LORS D'UNE COPIE, nom PAR LES NOMS DES CHAMPS DU TABLEAU
                     textSpan.textContent = `${index + 1}. ${item.nom}`;
                 } else {
                     textSpan.textContent = `${index + 1}. ID: ${id}`;
@@ -213,6 +214,7 @@
                 return;
             }
 
+// CHANGER, LORS D'UNE COPIE, LES NOMS DES CHAMPS DU TABLEAU
             const data = {
                 nom: document.getElementById('nom').value,
                 categorie: selectedAllItemId,

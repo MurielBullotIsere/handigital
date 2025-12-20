@@ -28,7 +28,7 @@
 
     
     <div class="card">
-        <form id="objetForm">
+        <form id="componentForm">
             <div class="form-group">
                 <label for="nom">Nom de l'objet :</label>
                 <input type="text" id="nom" required>
@@ -37,17 +37,17 @@
             <div class="form-group">
                 <label>Catégorie de l'objet :</label>
                 <div class="inline-group">
-                    <select id="categorySelect">
+                    <select id="subclassSelect">
                         <option value="">-- Choisir une catégorie --</option>
                     </select>
-                    <button type="button" class="add-subclass-btn" id="addCategoryBtn">
+                    <button type="button" class="add-subclass-btn" id="addSubclassBtn">
                         <i class="fa-solid fa-plus"></i>
                         Cliquer pour ajouter
                     </button>
                 </div>
                 <!-- <small>Vous pouvez ajouter plusieurs fois la même catégorie.</small> -->
 
-                <ul id="selectedCategoryList">
+                <ul id="selectedSubclassList">
                     <li>Aucune catégorie sélectionnée pour l'instant.</li>
                 </ul>
             </div>
@@ -65,15 +65,21 @@
 
     <script>
         const API_BASE_URL = 'http://localhost:3000/api/objets';     // Définition d'une variable constante qui contient l’adresse de base de l'API. Utilisation : ${API_BASE_URL}
-        const API_CATEGORIES = 'http://localhost:3000/api/categories';
+        const API_SUBCLASS = 'http://localhost:3000/api/categories';
 
-        const form = document.getElementById('objetForm');
-        const categorySelect = document.getElementById('categorySelect');
-        const addCategoryBtn = document.getElementById('addCategoryBtn');
-        const selectedCategoryList = document.getElementById('selectedCategoryList');
+        const form = document.getElementById('componentForm');
+        const subclassSelect = document.getElementById('subclassSelect');
+        const addSubclassBtn = document.getElementById('addSubclassBtn');
+        const selectedSubclassList = document.getElementById('selectedSubclassList');
 
-        let allCategories = [];
-        let selectedCategories = []; // tableau d'ObjectId (string), avec doublons possibles
+        const messageChoisir = "-- Choisir une catégorie --";
+        const messageErreurSubclass = "Erreur lors du chargement des catégories";
+        const messageSelection = "Aucune catégorie sélectionnée pour l'instant.";
+        const messageSelectionner = "Veuillez sélectionner une catégorie."
+        const messageAjouter = "Veuillez ajouter une catégorie.";
+
+        let allSubclassItem = [];
+        let selectedAllItemId = []; // tableau d'ObjectId (string), avec doublons possibles
 
         /**
          * Affiche un message de type toast (succès ou erreur)
@@ -94,43 +100,45 @@
             
         }
 
-        async function loadCategories() {
+        async function loadSubclass() {
             try {
-                const response = await fetch(API_CATEGORIES);
-                const categories = await response.json();
-                allCategories = Array.isArray(categories) ? categories : [];
+                const dataResponse = await fetch(API_SUBCLASS);
+                const dataJson = await dataResponse.json();
+                allSubclassItem = Array.isArray(dataJson) ? dataJson : [];
 
-                categorySelect.innerHTML = '<option value="">-- Choisir un objet --</option>';
+                subclassSelect.innerHTML = `<option value="">${messageChoisir}</option>`;
 
-                allCategories.forEach(c => {
+                allSubclassItem.forEach(si => {
                     const opt = document.createElement('option');
-                    opt.value = c._id;
-                    opt.textContent = `${c.nom}`;
-                    categorySelect.appendChild(opt);
+                    opt.value = si._id;
+// CHANGER, LORS D'UNE COPIE, nom PAR LES NOMS DES CHAMPS DU TABLEAU
+                    opt.textContent = `${si.nom}`;
+                    subclassSelect.appendChild(opt);
                 });
             } catch (error) {
                 console.error(error);
-                showToast('Erreur lors du chargement des catégories.', 'error');
+                showToast(messageErreurSubclass, 'error');
             }
         }
 
 
-        function refreshSelectedCategoryList() {
-            selectedCategoryList.innerHTML = '';
+        function refreshSelectedSubclassList() {
+            selectedSubclassList.innerHTML = '';
 
-            if (selectedCategories.length === 0) {
-                selectedCategoryList.innerHTML = '<li>Aucune catégorie sélectionnée pour l\'instant.</li>';
+            if (selectedAllItemId.length === 0) {
+                selectedSubclassList.innerHTML = `<li>${messageSelection}</li>`;
                 return;
             }
 
-            selectedCategories.forEach((id, index) => {
-                const category = allCategories.find(c => c._id === id);
+            selectedAllItemId.forEach((id, index) => {
+                const item = allSubclassItem.find(si => si._id === id);
                 const li = document.createElement('li');
                 li.className = 'selected-subclass-item';
 
                 const textSpan = document.createElement('span');
-                if (category) {
-                    textSpan.textContent = `${index + 1}. ${category.nom}`;
+                if (item) {
+// CHANGER, LORS D'UNE COPIE, nom PAR LES NOMS DES CHAMPS DU TABLEAU
+                    textSpan.textContent = `${index + 1}. ${item.nom}`;
                 } else {
                     textSpan.textContent = `${index + 1}. ID: ${id}`;
                 }
@@ -139,29 +147,29 @@
                 removeBtn.className = 'remove-subclass-btn';
                 removeBtn.type = 'button';
                 removeBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
-                removeBtn.onclick = () => removeCategory(index);
+                removeBtn.onclick = () => removeSubclassEdit(index);
 
                 li.appendChild(textSpan);
                 li.appendChild(removeBtn);
-                selectedCategoryList.appendChild(li);
+                selectedSubclassList.appendChild(li);
             });
         }
 
-        function removeCategory(index) {
-            selectedCategories.splice(index, 1);
-            refreshSelectedCategoryList();
+        function removeSubclassEdit(index) {
+            selectedAllItemId.splice(index, 1);
+            refreshSelectedSubclassList();
         }
 
-        addCategoryBtn.addEventListener('click', () => {
-            const selectedId = categorySelect.value;
+        addSubclassBtn.addEventListener('click', () => {
+            const selectedId = subclassSelect.value;
 
             if (!selectedId) {
-                showToast('Veuillez sélectionner une catégorie.', 'error');
+                showToast(messageSelectionner, 'error');
                 return;
             }
 
-            selectedCategories.push(selectedId);
-            refreshSelectedCategoryList();
+            selectedAllItemId.push(selectedId);
+            refreshSelectedSubclassList();
         });
 
         // Quand le formulaire est soumis (submit), exécute la fonction suivante.
@@ -169,15 +177,15 @@
         form.addEventListener('submit', async (e) => {
             e.preventDefault(); // preventDefault() pour empecher le rechargement automatique de la page
 
-            if (selectedCategories.length === 0) {
-                showToast('Veuillez ajouter au moins une catégorie à l\'objet.', 'error');
+            if (selectedAllItemId.length === 0) {
+                showToast(messageAjouter, 'error');
                 return;
             }
 
             // Reconstruction d'un objet avec les données du formulaire
             const data = {
                 nom: document.getElementById('nom').value,
-                categorie: selectedCategories,
+                categorie: selectedAllItemId,
                 description: document.getElementById('description').value
             };
 
@@ -192,12 +200,12 @@
                 const result = await response.json();                           // Récupération de la réponse du serveur.
 
                 if (response.ok) {
-                    showToast('Objet créé avec succès !', 'success');
+                    showToast('Succès de la création', 'success');
                     setTimeout(() => {
                         window.location.href = 'getObjectList.html';
-                    }, 5000);  // Après 5 secondes, on redirige l’utilisateur vers getObjectList.html
+                    }, 1000);  // Après 5 secondes, on redirige l’utilisateur vers getObjectList.html
                 } else {
-                    showToast('Erreur : ' + (result.error || "Impossible de créer l'objet."), 'error');
+                    showToast('Erreur : ' + (result.error || "Impossible d'enregistrer"), 'error');
                 }
 /**
                 // Mettre le texte dans la <div id="result"></div> de la page HTML.
@@ -207,13 +215,13 @@
                                                                      // 2 : indentation pour rendre le JSON lisible
 */
             } catch (error) {
-            console.error('Erreur création objet :', error);
+            console.error(error);
             showToast('Erreur lors de la communication avec le serveur.', 'error');
             }
         });
 
         // init
-        loadCategories();
+        loadSubclass();
     
     </script>
 
