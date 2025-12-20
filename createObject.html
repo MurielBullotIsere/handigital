@@ -40,9 +40,9 @@
                     <select id="categorySelect">
                         <option value="">-- Choisir une catégorie --</option>
                     </select>
-                    <button type="button" class="add-category-btn" id="addCategoryBtn">
+                    <button type="button" class="add-subclass-btn" id="addCategoryBtn">
                         <i class="fa-solid fa-plus"></i>
-                        Ajouter
+                        Cliquer pour ajouter
                     </button>
                 </div>
                 <!-- <small>Vous pouvez ajouter plusieurs fois la même catégorie.</small> -->
@@ -57,7 +57,7 @@
                 <input type="text" id="description" required>
             </div>
             <button type="submit" class="submit-btn">
-                <i class="fa-solid fa-plus"></i>
+                <i class="fa-regular fa-pen-to-square"></i>
                 Créer l'objet
             </button>
         </form>
@@ -126,7 +126,7 @@
             selectedCategories.forEach((id, index) => {
                 const category = allCategories.find(c => c._id === id);
                 const li = document.createElement('li');
-                li.className = 'selected-category-item';
+                li.className = 'selected-subclass-item';
 
                 const textSpan = document.createElement('span');
                 if (category) {
@@ -136,7 +136,7 @@
                 }
 
                 const removeBtn = document.createElement('button');
-                removeBtn.className = 'remove-category-btn';
+                removeBtn.className = 'remove-subclass-btn';
                 removeBtn.type = 'button';
                 removeBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
                 removeBtn.onclick = () => removeCategory(index);
@@ -156,7 +156,7 @@
             const selectedId = categorySelect.value;
 
             if (!selectedId) {
-                showToast('Veuillez sélectionner un objet.', 'error');
+                showToast('Veuillez sélectionner une catégorie.', 'error');
                 return;
             }
 

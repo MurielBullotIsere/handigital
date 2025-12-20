@@ -7,7 +7,7 @@ router.post('/', async (req, res) => {
     try {
         const newObjet = new Objets(req.body);
         const objetRegistered = await newObjet.save();
-        await objetRegistered.populate('categorie');
+        await objetRegistered.populate('categorie', 'nom');
         res.status(200).json(objetRegistered);
     } catch (error) {
         res.status(400).json({ error: error.message });
@@ -16,7 +16,7 @@ router.post('/', async (req, res) => {
 // Obtenir un tableau JSON contenant tous les enregistrements de la table.
 router.get('/', async (req, res) => {
     try {
-        const objet = await Objets.find().populate('categorie');
+        const objet = await Objets.find().populate('categorie', 'nom');
         res.status(200).json(objet);
     } catch (error) {
         res.status(400).json({ error: error.message });
@@ -25,7 +25,7 @@ router.get('/', async (req, res) => {
 // Trouver un enregistrement par ID.   
 router.get('/:id', async (req, res) => {
     try {
-        const objet = await Objets.findById(req.params.id).populate('categorie');
+        const objet = await Objets.findById(req.params.id).populate('categorie', 'nom');
 
           if (!objet) {
             return res.status(404).json({ error: 'Objet non trouvé' });
@@ -44,7 +44,7 @@ router.put('/:id', async (req, res) => {
             req.params.id, 
             req.body, 
             { new: true }
-        ).populate('categorie');
+        ).populate('categorie', 'nom');
 
         if (!updatedObjet) {
             return res.status(404).json({ error: 'Objet non trouvé' });
