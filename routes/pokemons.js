@@ -10,7 +10,7 @@ router.post('/', async (req, res) => {
 
         await pokemonRegistered.populate([
             { path: 'types', select: 'nom' },
-            { path: 'attaques', select: 'nom puissance precision description' }
+            { path: 'attaques', select: 'nom puissance precision' }
         ]);
 
         res.status(200).json(pokemonRegistered);
@@ -24,7 +24,7 @@ router.get('/', async (req, res) => {
     try {
         const pokemons = await Pokemons.find().populate([
             { path: 'types', select: 'nom' },
-            { path: 'attaques', select: 'nom puissance precision description' }
+            { path: 'attaques', select: 'nom puissance precision' }
         ]);
 
         res.status(200).json(pokemons);
@@ -38,7 +38,7 @@ router.get('/:id', async (req, res) => {
     try {
         const pokemon = await Pokemons.findById(req.params.id).populate([
             { path: 'types', select: 'nom' },
-            { path: 'attaques', select: 'nom puissance precision description' }
+            { path: 'attaques', select: 'nom puissance precision' }
         ]);
 
         if (!pokemon) {
@@ -60,7 +60,7 @@ router.put('/:id', async (req, res) => {
             { new: true }
         ).populate([
             { path: 'types', select: 'nom' },
-            { path: 'attaques', select: 'nom puissance precision description' }
+            { path: 'attaques', select: 'nom puissance precision' }
         ]);
 
         if (!updatedPokemon) {

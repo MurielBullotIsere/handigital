@@ -1,53 +1,111 @@
 const express = require('express');
 const router = express.Router();
-const Dresseur = require('../models/Dresseurs');     // Importation du modèle Mongoose pour pouvoir créer et enregistrer des dresseurs.
+const Dresseurs = require('../models/Dresseurs');
 
-// Ajout d'un nouveau dresseur dans la base de données.
+// Ajouter un nouveau dresseur
 router.post('/', async (req, res) => {
     try {
-        const newDresseur = new Dresseurs(req.body);             // Création d'un nouvel enregistrement à partir de models/Dresseurs.js
-        const dresseurRegistered = await newDresseur.save();    // save() enregistre dans la base de données, await attend que MongoDB réponde.
-        res.status(200).json(dresseurRegistered);               // Envoi d'un objet JSON contenant le dresseur enregistré.
+        const newDresseur = new Dresseurs(req.body);
+        const dresseurRegistered = await newDresseur.save();
+
+        await dresseurRegistered.populate([
+            {
+                path: 'pokemon_captures.pokemon',
+                select: 'nom'
+            },
+            {
+                path: 'objets',
+                select: 'nom'
+            }
+        ]);
+
+        res.status(200).json(dresseurRegistered);
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
 });
-// Obtenir un tableau JSON contenant tous les enregistrements de la table Dresseur.
+
+// Obtenir tous les dresseurs
 router.get('/', async (req, res) => {
     try {
-        const dresseur = await Dresseurs.find();             // .find() est l'équivalent de SELECT * FROM dresseurs, sous forme d’un tableau JavaScript.
-        res.status(200).json(dresseur);
+        const dresseurs = await Dresseurs.find().populate([
+            {
+                path: 'pokemon_captures.pokemon',
+                select: 'nom'
+            },
+            {
+                path: 'objets',
+                select: 'nom'
+            }
+        ]);
+
+        res.status(200).json(dresseurs);
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
 });
 
+// Obtenir un dresseur par ID
 router.get('/:id', async (req, res) => {
     try {
-        const dresseur = await Dresseurs.findById(req.params.id);
+        const dresseur = await Dresseurs.findById(req.params.id).populate([
+            {
+                path: 'pokemon_captures.pokemon',
+                select: 'nom'
+            },
+            {
+                path: 'objets',
+                select: 'nom'
+            }
+        ]);
+
+        if (!dresseur) {
+            return res.status(404).json({ error: 'Dresseur non trouvé' });
+        }
+
         res.status(200).json(dresseur);
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
 });
 
-// Trouver tous les dresseurs par condition.    :    const dresseur = await Dresseurs.find({ nom: "Sacha" });
-// Trouver le premier dresseur trouvé par condition.   :    const dresseur = await Dresseurs.findOne({ nom: "Sacha" });
-
-// Modifier un enregistrement
+// Modifier un dresseur
 router.put('/:id', async (req, res) => {
     try {
-        const updatedDresseur = await Dresseurs.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        const updatedDresseur = await Dresseurs.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            { new: true }
+        ).populate([
+            {
+                path: 'pokemon_captures.pokemon',
+                select: 'nom'
+            },
+            {
+                path: 'objets',
+                select: 'nom'
+            }
+        ]);
+
+        if (!updatedDresseur) {
+            return res.status(404).json({ error: 'Dresseur non trouvé' });
+        }
+
         res.status(200).json(updatedDresseur);
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
 });
 
-// Effacer un enregistrement
+// Supprimer un dresseur
 router.delete('/:id', async (req, res) => {
     try {
         const deletedDresseur = await Dresseurs.findByIdAndDelete(req.params.id);
+
+        if (!deletedDresseur) {
+            return res.status(404).json({ error: 'Dresseur non trouvé' });
+        }
+
         res.status(200).json(deletedDresseur);
     } catch (error) {
         res.status(400).json({ error: error.message });
