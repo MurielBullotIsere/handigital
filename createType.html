@@ -20,7 +20,7 @@
     <div class="page-header">
         <h2>Créer un type</h2>
 
-        <button class="back-btn" onclick="window.location.href='getTypeList.html'">
+        <button class="back-btn" onclick="window.location.href=pageListe">
             <i class="fa-solid fa-arrow-left"></i>
             Retour à la liste
         </button>
@@ -62,6 +62,8 @@
     <script>
         const API_BASE_URL = 'http://localhost:3000/api/types';     // Définition d'une variable constante qui contient l’adresse de base de l'API. Utilisation : ${API_BASE_URL}
         const API_SUBCLASS = 'http://localhost:3000/api/affinites';
+
+        const pageListe = "getTypeList.html"
 
         const form = document.getElementById('componentForm');
         const subclassSelect = document.getElementById('subclassSelect');
@@ -195,7 +197,7 @@
                 if (response.ok) {
                     showToast('Succès de la création', 'success');
                     setTimeout(() => {
-                        window.location.href = 'getTypeList.html';
+                        window.location.href = pageListe;
                     }, 1000);  
                 } else {
                     showToast('Erreur : ' + (result.error || "Impossible d'enregistrer"), 'error');

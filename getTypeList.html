@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Liste des objets</title>
+    <title>Liste des types</title>
         <!-- Charger la bibliothèque d’icônes Font Awesome depuis un CDN (Cloudflare), 
              Avec vérification de sécurité (SRI) (integrity)
              Sans fuite de données (referrer + crossorigin)  -->
@@ -18,11 +18,11 @@
     <div id="toastContainer"></div>
 
     <div class="page-header">
-        <h2>Liste des objets</h2>
+        <h2>Liste des types</h2>
 
-        <button class="create-btn" onclick="window.location.href='createObject.html'">
+        <button class="create-btn" onclick="window.location.href='createType.html'">
             <i class="fa-solid fa-plus"></i>
-            Créer un objet
+            Créer un type
         </button>
     </div>
     
@@ -30,25 +30,24 @@
         <thead>
         <tr>
             <th>Nom</th>
-            <th>Description</th>
             <th>Actions</th>
         </tr>
         </thead>
-        <tbody id="objetsTableBody"></tbody>
+        <tbody id="typesTableBody"></tbody>
     </table>
 
     <script>
-        const API_BASE_URL = 'http://localhost:3000/api/objets';
-        const tbody = document.getElementById("objetsTableBody");
+        const API_BASE_URL = 'http://localhost:3000/api/types';
+        const tbody = document.getElementById("typesTableBody");
 
-        const pageModifier = "editObject.html";
-        const pageEditer = "getOneObject.html";
-        
-        const messageSupprime = "Objet supprimé avec succès !";
-        const messageConfirmation = "Voulez-vous vraiment supprimer cet objet ?";
-        const messageAucun = "Aucun objet trouvé.";
-        const messageErreur = "Erreur lors du chargement des objets";
-        const messageVide = "Aucune catégorie associée.";
+        const pageModifier = "editType.html";
+        const pageEditer = "getOneType.html";
+
+        const messageSupprime = "Type supprimé avec succès !";
+        const messageConfirmation = "Voulez-vous vraiment supprimer ce type ?";
+        const messageAucun = "Aucun type trouvé.";
+        const messageErreur = "Erreur lors du chargement des types";
+        const messageVide = "Aucune affinité associée.";
 
 
         /**
@@ -89,10 +88,8 @@
 
                 dataJson.forEach(item => {
                     const tr = document.createElement("tr");
-// CHANGER, LORS D'UNE COPIE, LES NOMS DES CHAMPS DE OBJET SANS LES TABLEAUX
                     tr.innerHTML = `
                         <td>${item.nom}</td>
-                        <td>${item.description}</td> 
                         <td>
                             <div class="actions">
                                 <button class="action-btn view" data-id="${item._id}" data-action="view">
@@ -123,7 +120,6 @@
 
             if (action === "view") {
                 window.location.href = `${pageEditer}?id=${id}`;
-
                 return;
             }
 

@@ -60,6 +60,8 @@
         const API_BASE_URL = 'http://localhost:3000/api/types';
         const API_SUBCLASS = 'http://localhost:3000/api/affinites';
 
+        const pageListe = "getTypeList.html"
+
         const form = document.getElementById('componentForm');
         const subclassSelect = document.getElementById('subclassSelect');
         const addSubclassBtn = document.getElementById('addSubclassBtn');
@@ -136,7 +138,7 @@
 
                 const textSpan = document.createElement('span');
                 if (item) {
-                    textSpan.textContent = `${index + 1}. ${item.nom} (${si.description})`;
+                    textSpan.textContent = `${index + 1}. ${item.nom} (${item.description})`;
                 } else {
                     textSpan.textContent = `${index + 1}. ID: ${id}`;
                 }
@@ -221,7 +223,7 @@
                 if (response.ok) {
                     showToast("Succès de la mise à jour !");
                     setTimeout(() => {
-                        window.location.href = "getTypeList.html";
+                        window.location.href = pageListe;
                     }, 1000);
                 } else {
                     showToast("Erreur : " + (result.error || "Impossible de mettre à jour"), "error");

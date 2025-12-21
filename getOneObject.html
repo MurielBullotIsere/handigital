@@ -52,6 +52,8 @@
     <script>
         const API_BASE_URL = 'http://localhost:3000/api/objets';
 
+        const pageModifier = "editObject.html";
+
         const nameValue  = document.getElementById('nameValue');
         const descriptionValue = document.getElementById('descriptionValue');
         const subclassList = document.getElementById('subclassList');
@@ -92,7 +94,7 @@
             editBtn.disabled = true;
         } else {
             editBtn.addEventListener('click', () => {
-                window.location.href = `editObject.html?id=${dataId}`;
+                window.location.href = `${pageModifier}?id=${dataId}`;
             });
 
             loadData();

@@ -18,7 +18,7 @@
     <div class="page-header">
         <h2>Modifier un objet</h2>
 
-        <button class="back-btn" onclick="window.location.href='getObjectList.html'">
+        <button class="back-btn" onclick="window.location.href=pageListe">
             <i class="fa-solid fa-arrow-left"></i>
             Retour à la liste
         </button>
@@ -64,6 +64,8 @@
     <script>
         const API_BASE_URL = 'http://localhost:3000/api/objets';
         const API_SUBCLASS = 'http://localhost:3000/api/categories';
+
+        const pageListe = "getObjectList.html"
 
         const form = document.getElementById('componentForm');
         const subclassSelect = document.getElementById('subclassSelect');
@@ -233,8 +235,7 @@
                 if (response.ok) {
                     showToast("Succès de la mise à jour !");
                     setTimeout(() => {
-// CHANGER L'ADRESSE
-                        window.location.href = "getObjectList.html";
+                        window.location.href = pageListe;
                     }, 1000);
                 } else {
                     showToast("Erreur : " + (result.error || "Impossible de mettre à jour"), "error");
