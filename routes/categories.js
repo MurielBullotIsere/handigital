@@ -24,7 +24,9 @@ router.get('/', async (req, res) => {
 // Trouver un enregistrement par ID.   
 router.get('/:id', async (req, res) => {
     try {
-        const categorie = await Categories.findById(req.params.id);
+        const categorie = await Categories.findById(
+            req.params.id
+        );
         res.status(200).json(categorie);
     } catch (error) {
         res.status(400).json({ error: error.message });
@@ -35,7 +37,11 @@ router.get('/:id', async (req, res) => {
 // Modifier un enregistrement
 router.put('/:id', async (req, res) => {
     try {
-        const updatedCategorie = await Categories.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        const updatedCategorie = await Categories.findByIdAndUpdate(
+            req.params.id, 
+            req.body, 
+            { new: true }
+        );
         res.status(200).json(updatedCategorie);
     } catch (error) {
         res.status(400).json({ error: error.message });
@@ -45,7 +51,9 @@ router.put('/:id', async (req, res) => {
 // Effacer un enregistrement
 router.delete('/:id', async (req, res) => {
     try {
-        const deletedCategorie = await Categories.findByIdAndDelete(req.params.id);
+        const deletedCategorie = await Categories.findByIdAndDelete(
+            req.params.id
+        );
         res.status(200).json(deletedCategorie);
     } catch (error) {
         res.status(400).json({ error: error.message });

@@ -31,7 +31,9 @@ router.get('/', async (req, res) => {
 // Trouver un enregistrement par ID.
 router.get('/:id', async (req, res) => {
     try {
-        const affinite = await Affinites.findById(req.params.id);
+        const affinite = await Affinites.findById(
+            req.params.id
+        );
         res.status(200).json(affinite);
     } catch (error) {
         res.status(400).json({ error: error.message });
@@ -54,7 +56,9 @@ router.put('/:id', async (req, res) => {
 // Effacer un enregistrement
 router.delete('/:id', async (req, res) => {
     try {
-        const deletedAffinite = await Affinites.findByIdAndDelete(req.params.id);
+        const deletedAffinite = await Affinites.findByIdAndDelete(
+            req.params.id
+        );
         res.status(200).json(deletedAffinite);
     } catch (error) {
         res.status(400).json({ error: error.message });
