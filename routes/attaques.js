@@ -7,9 +7,7 @@ router.post('/', async (req, res) => {
     try {
         const newAttaque = new Attaques(req.body);
         const attaqueRegistered = await newAttaque.save();
-
-        await attaqueRegistered.populate('type', 'nom puissance precision');
-
+        await attaqueRegistered.populate('type', 'nom');
         res.status(200).json(attaqueRegistered);
     } catch (error) {
         res.status(400).json({ error: error.message });
@@ -19,7 +17,7 @@ router.post('/', async (req, res) => {
 // Obtenir toutes les attaques
 router.get('/', async (req, res) => {
     try {
-        const attaques = await Attaques.find().populate('type', 'nom puissance precision');
+        const attaques = await Attaques.find().populate('type', 'nom');
         res.status(200).json(attaques);
     } catch (error) {
         res.status(400).json({ error: error.message });
@@ -31,7 +29,7 @@ router.get('/:id', async (req, res) => {
     try {
         const attaque = await Attaques.findById(
             req.params.id
-        ).populate('type', 'nom puissance precision');
+        ).populate('type', 'nom');
 
         if (!attaque) {
             return res.status(404).json({ error: 'Attaque non trouvée' });
@@ -50,7 +48,7 @@ router.put('/:id', async (req, res) => {
             req.params.id,
             req.body,
             { new: true }
-        ).populate('type', 'nom puissance precision');
+        ).populate('type', 'nom');
 
         if (!updatedAttaque) {
             return res.status(404).json({ error: 'Attaque non trouvée' });
