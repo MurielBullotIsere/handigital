@@ -20,7 +20,7 @@
     <div class="page-header">
         <h2>Liste des objets</h2>
 
-        <button class="create-btn" onclick="window.location.href='createObject.html'">
+        <button class="create-btn" onclick="window.location.href=pageCreer">
             <i class="fa-solid fa-plus"></i>
             Créer un objet
         </button>
@@ -41,6 +41,7 @@
         const API_BASE_URL = 'http://localhost:3000/api/objets';
         const tbody = document.getElementById("objetsTableBody");
 
+        const pageCreer = "createObject.html";
         const pageModifier = "editObject.html";
         const pageEditer = "getOneObject.html";
         
@@ -48,8 +49,6 @@
         const messageConfirmation = "Voulez-vous vraiment supprimer cet objet ?";
         const messageAucun = "Aucun objet trouvé.";
         const messageErreur = "Erreur lors du chargement des objets";
-        const messageVide = "Aucune catégorie associée.";
-
 
         /**
          * Affiche un message de type toast (succès ou erreur)

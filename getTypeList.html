@@ -20,7 +20,7 @@
     <div class="page-header">
         <h2>Liste des types</h2>
 
-        <button class="create-btn" onclick="window.location.href='createType.html'">
+        <button class="create-btn" onclick="window.location.href=pageCreer">
             <i class="fa-solid fa-plus"></i>
             Créer un type
         </button>
@@ -40,6 +40,7 @@
         const API_BASE_URL = 'http://localhost:3000/api/types';
         const tbody = document.getElementById("typesTableBody");
 
+        const pageCreer = "createType.html";
         const pageModifier = "editType.html";
         const pageEditer = "getOneType.html";
 
@@ -47,8 +48,6 @@
         const messageConfirmation = "Voulez-vous vraiment supprimer ce type ?";
         const messageAucun = "Aucun type trouvé.";
         const messageErreur = "Erreur lors du chargement des types";
-        const messageVide = "Aucune affinité associée.";
-
 
         /**
          * Affiche un message de type toast (succès ou erreur)
