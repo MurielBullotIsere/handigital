@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Modifier un pokémon</title>
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="   
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+    <div id="toastContainer"></div>
+
+    <div class="page-header">
+        <h2>Modifier le pokémon</h2>
+
+        <button class="back-btn" onclick="window.location.href=pageListe">
+            <i class="fa-solid fa-arrow-left"></i>
+            Retour à la liste
+        </button>
+    </div>
+
+    
+    <div class="card">
+        <form id="componentForm">
+            <div class="form-group">
+                <label for="nom">Nom du pokémon :</label>
+                <input type="text" id="nom" required>
+            </div>
+
+            <div class="form-group">
+                <label>Type du pokémon :</label>
+                <div class="inline-group">
+                    <select id="subclassSelect">
+                        <option value="">-- Choisir un type --</option>
+                    </select>
+                    <button type="button" class="add-subclass-btn" id="addSubclassBtn">
+                        <i class="fa-solid fa-plus"></i>
+                        Cliquer pour ajouter
+                    </button>
+                </div>
+
+                <ul id="selectedSubclassList">
+                    <li>Chargement...</li>
+                </ul>
+            </div>
+
+            <div class="form-group">
+                <label>Attaques du pokémon :</label>
+                <div class="inline-group">
+                    <select id="subclassSelect2">
+                        <option value="">-- Choisir une attaque --</option>
+                    </select>
+                    <button type="button" class="add-subclass-btn" id="addSubclassBtn2">
+                        <i class="fa-solid fa-plus"></i>
+                        Cliquer pour ajouter
+                    </button>
+                </div>
+
+                <ul id="selectedSubclassList2">
+                   <li>Chargement...</li>
+                </ul>
+            </div>
+
+            <div class="form-group">
+                <label for="taille">Taille :</label>
+                <input type="number" id="taille" required min="0" step="0.01">
+            </div>
+            <div class="form-group">
+                <label for="poids">Poids :</label>
+                <input type="number" id="poids" required min="0" step="0.01">
+            </div>
+
+            <div class="form-group">
+                <label for="sexe">Sexe :</label>
+
+                <select id="sexe" name="sexe">
+                    <option value="false" selected>Mâle</option>
+                    <option value="true">Femelle</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="description">Description :</label>
+                <input type="text" id="description" required>
+            </div>
+            <button type="submit" class="submit-btn">
+                <i class="fa-regular fa-pen-to-square"></i>
+                Modifier l'objet
+            </button>
+        </form>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:3000/api/pokemons';     // Définition d'une variable constante qui contient l’adresse de base de l'API. Utilisation : ${API_BASE_URL}
+        const API_SUBCLASS = 'http://localhost:3000/api/types';
+        const API_SUBCLASS2 = 'http://localhost:3000/api/attaques';
+
+        const pageListe = "getPokemonList.html"
+
+        const form = document.getElementById('componentForm');
+        const subclassSelect = document.getElementById('subclassSelect');
+        const addSubclassBtn = document.getElementById('addSubclassBtn');
+        const selectedSubclassList = document.getElementById('selectedSubclassList');
+        const subclassSelect2 = document.getElementById('subclassSelect2');
+        const addSubclassBtn2 = document.getElementById('addSubclassBtn2');
+        const selectedSubclassList2 = document.getElementById('selectedSubclassList2');
+
+        const messageChoisir = "-- Choisir un type --";
+        const messageChoisir2 = "-- Choisir une attaque --";
+        const messageErreurSubclass = "Erreur lors du chargement des types";
+        const messageErreurSubclass2 = "Erreur lors du chargement des attaques";
+        const messageSelection = "Aucun type sélectionné pour l'instant.";
+        const messageSelection2 = "Aucune attaque sélectionnée pour l'instant.";
+        const messageSelectionner = "Veuillez sélectionner un type."
+        const messageSelectionner2 = "Veuillez sélectionner une attaque."
+        const messageAjouter = "Veuillez ajouter un type.";
+        const messageAjouter2 = "Veuillez ajouter une attaque.";
+        const messageImpossible = "Impossible de charger ce pokémon.";
+        const messageErreurComponent = "Erreur lors du chargement du pokémon";
+
+        let allSubclassItem = [];
+        let allSubclassItem2 = [];
+        let selectedAllItemId = [];
+        let selectedAllItemId2 = [];
+
+        function showToast(message, type = "success") {
+            const container = document.getElementById("toastContainer");        // Indication de l'emplacement <div> qui servira de conteneur pour les notifications.
+            const toast = document.createElement("div");                        // Création dynamique d'un nouvel élément <div> qui représentera notre notification.
+
+            toast.className = "toast";                                          // On ajoute la classe "toast" à ce <div>.
+            if (type === "error") toast.classList.add("error");                 // Si le type de notification est "error", on ajoute une classe CSS "error" supplémentaire.
+
+            toast.textContent = message;                                        // On met le texte fourni (message) à l’intérieur du <div>.
+            container.appendChild(toast);                                       // On ajoute le toast dans le conteneur sur la page pour qu’il devienne visible.
+
+            setTimeout(() => {toast.remove();}, 5000);                          // Suppression automatique du toast après 5000 millisecondes (5 secondes).
+        }
+
+        // Ici on s'assure que l'utilisateur a fourni un ID dans l'URL
+        // S'il n'a pas fourni un ID, on affiche un message d'erreur
+        const params = new URLSearchParams(window.location.search);
+        const dataId = params.get('id');
+
+        if (!dataId) {
+            showToast("Aucun ID fourni dans l'URL.", "error");
+            form.style.display = "none";
+        } else {
+            init();
+        }
+
+        async function loadSubclass() {
+            try {
+                const dataResponse = await fetch(API_SUBCLASS);
+                const dataJson = await dataResponse.json();
+                allSubclassItem = Array.isArray(dataJson) ? dataJson : [];
+
+                subclassSelect.innerHTML = `<option value="">${messageChoisir}</option>`;
+
+                allSubclassItem.forEach(si => {
+                    const opt = document.createElement('option');
+                    opt.value = si._id;
+                    opt.textContent = `${si.nom}`;
+                    subclassSelect.appendChild(opt);
+                });
+            } catch (error) {
+                console.error(error);
+                showToast(messageErreurSubclass, 'error');
+            }
+        }
+        async function loadSubclass2() {
+            try {
+                const dataResponse2 = await fetch(API_SUBCLASS2);
+                const dataJson2 = await dataResponse2.json();
+                allSubclassItem2 = Array.isArray(dataJson2) ? dataJson2 : [];
+
+                subclassSelect2.innerHTML = `<option value="">${messageChoisir2}</option>`;
+
+                allSubclassItem2.forEach(si => {
+                    const opt = document.createElement('option');
+                    opt.value = si._id;
+                    opt.textContent = `${si.nom} : puissance = ${si.puissance}, précision = ${si.precision}`;
+                    subclassSelect2.appendChild(opt);
+                });
+            } catch (error) {
+                console.error(error);
+                showToast(messageErreurSubclass2, 'error');
+            }
+        }
+
+        function refreshSelectedSubclassList() {
+            selectedSubclassList.innerHTML = '';
+
+            if (selectedAllItemId.length === 0) {
+                selectedSubclassList.innerHTML = `<li>${messageSelection}</li>`;
+                return;
+            }
+
+            selectedAllItemId.forEach((id, index) => {
+                const item = allSubclassItem.find(si => si._id === id);
+                const li = document.createElement('li');
+                li.className = 'selected-subclass-item';
+
+                const textSpan = document.createElement('span');
+                if (item) {
+// CHANGER, LORS D'UNE COPIE, nom PAR LES NOMS DES CHAMPS DU TABLEAU
+                    textSpan.textContent = `${index + 1}. ${item.nom}`;
+                } else {
+                    textSpan.textContent = `${index + 1}. ID: ${id}`;
+                }
+
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'remove-subclass-btn';
+                removeBtn.type = 'button';
+                removeBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+                removeBtn.onclick = () => removeSubclassEdit(index);
+
+                li.appendChild(textSpan);
+                li.appendChild(removeBtn);
+                selectedSubclassList.appendChild(li);
+            });
+        }
+
+
+        function refreshSelectedSubclassList2() {
+            selectedSubclassList2.innerHTML = '';
+
+            if (selectedAllItemId2.length === 0) {
+                selectedSubclassList2.innerHTML = `<li>${messageSelection2}</li>`;
+                return;
+            }
+
+            selectedAllItemId2.forEach((id, index) => {
+                const item = allSubclassItem2.find(si => si._id === id);
+                const li = document.createElement('li');
+                li.className = 'selected-subclass-item';
+
+                const textSpan = document.createElement('span');
+                if (item) {
+// CHANGER, LORS D'UNE COPIE, nom PAR LES NOMS DES CHAMPS DU TABLEAU
+                    textSpan.textContent = `${index + 1}. ${item.nom} (puissance = ${item.puissance}, précision = ${item.precision})`;
+                } else {
+                    textSpan.textContent = `${index + 1}. ID: ${id}`;
+                }
+
+                const removeBtn2 = document.createElement('button');
+                removeBtn2.className = 'remove-subclass-btn';
+                removeBtn2.type = 'button';
+                removeBtn2.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+                removeBtn2.onclick = () => removeSubclassEdit2(index);
+
+                li.appendChild(textSpan);
+                li.appendChild(removeBtn2);
+                selectedSubclassList2.appendChild(li);
+            });
+        }
+
+        function removeSubclassEdit(index) {
+            selectedAllItemId.splice(index, 1);
+            refreshSelectedSubclassList();
+        }
+
+        function removeSubclassEdit2(index) {
+            selectedAllItemId2.splice(index, 1);
+            refreshSelectedSubclassList2();
+        }
+
+        async function loadComponent() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/${dataId}`);
+                const component = await response.json();
+
+                if (!response.ok || !component) {
+                    showToast(messageImpossible, "error");
+                    form.style.display = "none";
+                    return;
+                }
+
+                document.getElementById('nom').value = component.nom || '';
+
+// CHANGER, LORS D'UNE COPIE, categorie PAR LE NOM DU TABLEAU
+                if (Array.isArray(component.types) && component.types.length > 0) {
+                    selectedAllItemId = component.types.map(c => (c && c._id) ? c._id : c);
+                } 
+                if (Array.isArray(component.attaques) && component.attaques.length > 0) {
+                    selectedAllItemId2 = component.attaques.map(c => (c && c._id) ? c._id : c);
+                } 
+                
+                document.getElementById('taille').value = component.taille || '';
+                document.getElementById('poids').value = component.poids || '';
+                document.getElementById('sexe').value = component.sexe ? "femelle" : "mâle" || '';
+                document.getElementById('description').value = component.description || '';
+
+                refreshSelectedSubclassList();
+                refreshSelectedSubclassList2();
+
+            } catch (error) {
+                console.error(error);
+                showToast(messageErreurComponent, "error");
+                form.style.display = "none";
+            }
+        }
+
+        addSubclassBtn.addEventListener('click', () => {
+            const selectedId = subclassSelect.value;
+
+            if (!selectedId) {
+                showToast(messageSelectionner, 'error');
+                return;
+            }
+
+            selectedAllItemId.push(selectedId);
+            refreshSelectedSubclassList();
+        });
+
+        addSubclassBtn2.addEventListener('click', () => {
+            const selectedId2 = subclassSelect2.value;
+
+            if (!selectedId2) {
+                showToast(messageSelectionner2, 'error');
+                return;
+            }
+
+            selectedAllItemId2.push(selectedId2);
+            refreshSelectedSubclassList2();
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault(); // On utilise preventDefault() pour empecher le rechargement de la page
+
+            if (selectedAllItemId.length === 0) {
+                showToast(messageAjouter, 'error');
+                return;
+            }
+            if (selectedAllItemId2.length === 0) {
+                showToast(messageAjouter2, 'error');
+                return;
+            }
+
+            const data = {
+                nom: document.getElementById('nom').value,
+                types: selectedAllItemId,
+                attaques: selectedAllItemId2,
+                taille: Number(document.getElementById('taille').value),
+                poids: Number(document.getElementById('poids').value),
+                sexe: document.getElementById('sexe').value,
+                description: document.getElementById('description').value
+            };
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/${dataId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showToast("Succès de la mise à jour !");
+                    setTimeout(() => {
+                        window.location.href = pageListe;
+                    }, 1000);
+                } else {
+                    showToast("Erreur : " + (result.error || "Impossible de mettre à jour"), "error");
+                }
+
+            } catch (error) {
+                console.error(error);
+                showToast("Erreur de communication avec le serveur.", "error");
+            }    
+        });
+
+        async function init() {
+            await loadSubclass();
+            await loadSubclass2();
+            await loadComponent();
+        }
+
+    </script>
+
+</body>
+</html>
