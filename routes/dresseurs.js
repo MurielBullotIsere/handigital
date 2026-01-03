@@ -9,14 +9,8 @@ router.post('/', async (req, res) => {
         const dresseurRegistered = await newDresseur.save();
 
         await dresseurRegistered.populate([
-            {
-                path: 'pokemon_captures.pokemon',
-                select: 'nom'
-            },
-            {
-                path: 'objets',
-                select: 'nom'
-            }
+            {path: 'pokemons',  select: 'nom taille poids sexe'},
+            {path: 'objets', select: 'nom'}
         ]);
 
         res.status(200).json(dresseurRegistered);
@@ -29,14 +23,8 @@ router.post('/', async (req, res) => {
 router.get('/', async (req, res) => {
     try {
         const dresseurs = await Dresseurs.find().populate([
-            {
-                path: 'pokemon_captures.pokemon',
-                select: 'nom'
-            },
-            {
-                path: 'objets',
-                select: 'nom'
-            }
+            {path: 'pokemons',  select: 'nom taille poids sexe'},
+            {path: 'objets', select: 'nom'}
         ]);
 
         res.status(200).json(dresseurs);
@@ -49,14 +37,8 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
     try {
         const dresseur = await Dresseurs.findById(req.params.id).populate([
-            {
-                path: 'pokemon_captures.pokemon',
-                select: 'nom'
-            },
-            {
-                path: 'objets',
-                select: 'nom'
-            }
+            {path: 'pokemons',  select: 'nom taille poids sexe'},
+            {path: 'objets', select: 'nom'}
         ]);
 
         if (!dresseur) {
@@ -77,14 +59,8 @@ router.put('/:id', async (req, res) => {
             req.body,
             { new: true }
         ).populate([
-            {
-                path: 'pokemon_captures.pokemon',
-                select: 'nom'
-            },
-            {
-                path: 'objets',
-                select: 'nom'
-            }
+            {path: 'pokemons',  select: 'nom taille poids sexe'},
+            {path: 'objets', select: 'nom'}
         ]);
 
         if (!updatedDresseur) {

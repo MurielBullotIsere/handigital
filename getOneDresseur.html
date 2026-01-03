@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Détails du dresseur</title>
+        <!-- Charger la bibliothèque d’icônes Font Awesome depuis un CDN (Cloudflare), 
+             Avec vérification de sécurité (SRI) (integrity)
+             Sans fuite de données (referrer + crossorigin)  -->
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="   
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div id="toastContainer"></div>
+
+    <div class="page-header">
+        <h2>Détails du dresseur</h2>
+
+        <div class="header-actions">
+            <button class="back-btn" onclick="window.location.href=pageListe">
+                <i class="fa-solid fa-arrow-left"></i>
+                Retour à la liste
+            </button>
+            <button class="edit-btn" id="editBtn">
+                <i class="fa-regular fa-pen-to-square"></i>
+                Modifier
+            </button>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="field-label">Nom</div>
+        <div class="field-value" id="nameValue">Chargement...</div>
+
+        <div class="field-label">Pokémons capturés</div>
+        <div class="field-value">
+            <ul id="subclassList">
+                <li>Chargement...</li>
+            </ul>
+        </div>
+        <div class="field-label">Inventaire du sac à dos</div>
+        <div class="field-value">
+            <ul id="subclassList2">
+                <li>Chargement...</li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="message"></div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:3000/api/dresseurs';
+
+        const pageListe = "getDresseurList.html";
+        const pageModifier = "editDresseur.html";
+
+        const nameValue  = document.getElementById('nameValue');
+        const subclassList = document.getElementById('subclassList');
+        const subclassList2 = document.getElementById('subclassList2');
+        const editBtn    = document.getElementById('editBtn');
+
+        const messageImpossible = "Impossible de charger ce dresseur.";
+        const messageVide = "Aucun pokémon capturé.";
+        const messageVide2 = "Sac à dos vide.";
+
+        const params = new URLSearchParams(window.location.search);
+        const dataId= params.get('id');
+
+        /**
+         * Affiche un message de type toast (succès ou erreur)
+         * @param {string} message - Le message à afficher
+         * @param {string} [type="success"] - Le type du message (succès ou erreur)
+         */
+        function showToast(message, type = "success") {
+            const container = document.getElementById("toastContainer");
+            const toast = document.createElement("div");
+
+            toast.className = "toast";
+            if (type === "error") toast.classList.add("error");
+
+            toast.textContent = message;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 5000);
+        }
+
+        // Vérification qu'une ID est bien fournie dans l'URL
+        if (!dataId) {
+            showToast("Aucun ID fourni dans l'URL.", "error");
+            nameValue.textContent  = '-';
+            subclassList.innerHTML = '<li>-</li>';
+            subclassList2.innerHTML = '<li>-</li>';
+            editBtn.disabled = true;
+        } else {
+            editBtn.addEventListener('click', () => {
+                window.location.href = `${pageModifier}?id=${dataId}`;
+            });
+
+            loadData();
+        }
+
+        /**
+         * Charge les données depuis le serveur et l'affiche dans la page.
+         * En cas d'erreur, un message d'erreur est affiché et les valeurs sont
+         * initialisées à "-".
+         */
+        async function loadData() {
+            try {
+                const dataResponse = await fetch(`${API_BASE_URL}/${dataId}`);
+                const dataJson = await dataResponse.json();
+
+                if (!dataResponse.ok || !dataJson) {
+                    showToast(messageImpossible, "error");
+                    nameValue.textContent  = '-';
+                    subclassList.innerHTML = '<li>-</li>';
+                    subclassList2.innerHTML = '<li>-</li>';
+                    return;
+                }
+
+                nameValue.textContent  = dataJson.nom  ?? '-';
+                subclassList.innerHTML = '';
+                subclassList2.innerHTML = '';
+
+            if (Array.isArray(dataJson.pokemons) && dataJson.pokemons.length > 0) {
+                dataJson.pokemons.forEach(c => {
+                    const li = document.createElement('li');
+                    if (c && typeof c === 'object') {
+                        li.textContent = `${c.nom || 'pokémons capturés'} (Taille : ${c.taille}, Poids : ${c.poids}, Sexe : ${c.sexe ? "femelle" : "mâle" || ''})`;
+                    } else {
+                        li.textContent = c;
+                    }
+                    subclassList.appendChild(li);
+                });
+            } else {
+                subclassList.innerHTML = `<li>${messageVide}</li>`;
+            }
+
+            if (Array.isArray(dataJson.objets) && dataJson.objets.length > 0) {
+                dataJson.objets.forEach(c => {
+                    const li = document.createElement('li');
+                    if (c && typeof c === 'object') {
+                        li.textContent = `${c.nom || 'objet'}`;
+                    } else {
+                        li.textContent = c;
+                    }
+                    subclassList2.appendChild(li);
+                });
+            } else {
+                subclassList2.innerHTML = `<li>${messageVide2}</li>`;
+            }
+        } catch (error) {
+            console.error(error);
+            showToast("Erreur lors du chargement", "error");
+            nameValue.textContent  = '-';
+            subclassList.innerHTML = '<li>-</li>';
+            subclassList2.innerHTML = '<li>-</li>';
+            }
+        }
+    </script>
+
+</body>
+</html>
