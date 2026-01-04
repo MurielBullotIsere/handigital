@@ -92,13 +92,6 @@
                 } else {
                     showToast('Erreur : ' + (result.error || "Impossible de créer la catégorie."), 'error');
                 }
-/**
-                // Mettre le texte dans la <div id="result"></div> de la page HTML.
-                document.getElementById('result').innerText =
-                    "Réponse serveur : " + JSON.stringify(result, null, 2);     
-                                                               // null : on n’utilise pas de fonction de transformation
-                                                                     // 2 : indentation pour rendre le JSON lisible
-*/
             } catch (error) {
             console.error('Erreur création catégorie :', error);
             showToast('Erreur lors de la communication avec le serveur.', 'error');

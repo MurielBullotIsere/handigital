@@ -123,7 +123,6 @@
                 subclassList.innerHTML = '';
                 descriptionValue.textContent = dataJson.description ?? '-';
 
-// CHANGER categorie LORS D'UNE COPIE, nom PAR LES NOMS DES CHAMPS DU TABLEAU
             if (Array.isArray(dataJson.categorie) && dataJson.categorie.length > 0) {
                 dataJson.categorie.forEach(c => {
                     const li = document.createElement('li');

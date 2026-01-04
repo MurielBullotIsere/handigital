@@ -206,7 +206,6 @@
 
                 const textSpan = document.createElement('span');
                 if (item) {
-// CHANGER, LORS D'UNE COPIE, nom PAR LES NOMS DES CHAMPS DU TABLEAU
                     textSpan.textContent = `${index + 1}. ${item.nom}`;
                 } else {
                     textSpan.textContent = `${index + 1}. ID: ${id}`;
@@ -240,7 +239,6 @@
 
                 const textSpan = document.createElement('span');
                 if (item) {
-// CHANGER, LORS D'UNE COPIE, nom PAR LES NOMS DES CHAMPS DU TABLEAU
                     textSpan.textContent = `${index + 1}. ${item.nom} (puissance = ${item.puissance}, précision = ${item.precision})`;
                 } else {
                     textSpan.textContent = `${index + 1}. ID: ${id}`;
@@ -281,7 +279,6 @@
 
                 document.getElementById('nom').value = component.nom || '';
 
-// CHANGER, LORS D'UNE COPIE, categorie PAR LE NOM DU TABLEAU
                 if (Array.isArray(component.types) && component.types.length > 0) {
                     selectedAllItemId = component.types.map(c => (c && c._id) ? c._id : c);
                 } 

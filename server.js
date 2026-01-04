@@ -10,7 +10,6 @@ app.use(express.json());                        // Retranscription en langage js
 
 // Si on a router.get('/') dans le fichier route, l'URL finale est GET http://localhost:3000/api/dresseurs
 app.use('/api/affinites', require('./routes/affinites'));
-app.use('/api/arenes', require('./routes/arenes'));
 app.use('/api/attaques', require('./routes/attaques'));
 app.use('/api/categories', require('./routes/categories'));
 app.use('/api/dresseurs', require('./routes/dresseurs'));       // toutes les routes déclarées dans routes/dresseur.js commencent par /api/dresseurs.

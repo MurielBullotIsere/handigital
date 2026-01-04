@@ -256,7 +256,6 @@
 
                 document.getElementById('nom').value = component.nom || '';
 
-// CHANGER, LORS D'UNE COPIE, categorie PAR LE NOM DU TABLEAU
                 if (Array.isArray(component.pokemons) && component.pokemons.length > 0) {
                     selectedAllItemId = component.pokemons.map(c => (c && c._id) ? c._id : c);
                 } 

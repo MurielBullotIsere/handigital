@@ -43,7 +43,6 @@
                          Cliquer pour ajouter
                     </button>
                 </div>
-                <!-- <small>Vous pouvez ajouter plusieurs fois la même catégorie.</small> -->
 
                 <ul id="selectedSubclassList">
                     <li>Chargement...</li>
@@ -119,7 +118,6 @@
                 allSubclassItem.forEach(si => {
                     const opt = document.createElement('option');
                     opt.value = si._id;
-// CHANGER, LORS D'UNE COPIE, nom PAR LES NOMS DES CHAMPS DU TABLEAU
                     opt.textContent = si.nom;  // `${si.nom}`
                     subclassSelect.appendChild(opt);
                 });
@@ -144,7 +142,6 @@
 
                 const textSpan = document.createElement('span');
                 if (item) {
-// CHANGER, LORS D'UNE COPIE, nom PAR LES NOMS DES CHAMPS DU TABLEAU
                     textSpan.textContent = `${index + 1}. ${item.nom}`;
                 } else {
                     textSpan.textContent = `${index + 1}. ID: ${id}`;
@@ -156,8 +153,8 @@
                 removeBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
                 removeBtn.onclick = () => removeSubclassEdit(index);
 
-                li.appendChild(textSpan);   // li.append(textSpan);   ????
-                li.appendChild(removeBtn);  // li.append(removeBtn);   ????
+                li.appendChild(textSpan);
+                li.appendChild(removeBtn);
                 selectedSubclassList.appendChild(li);
             });
         }
@@ -180,7 +177,6 @@
 
                 document.getElementById('nom').value = component.nom || '';
 
-// CHANGER, LORS D'UNE COPIE, categorie PAR LE NOM DU TABLEAU
                 if (Array.isArray(component.categorie) && component.categorie.length > 0) {
                     selectedAllItemId = component.categorie.map(c => (c && c._id) ? c._id : c);
                 } 
@@ -216,7 +212,6 @@
                 return;
             }
 
-// CHANGER, LORS D'UNE COPIE, LES NOMS DES CHAMPS DU TABLEAU
             const data = {
                 nom: document.getElementById('nom').value,
                 categorie: selectedAllItemId,
